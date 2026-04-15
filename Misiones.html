@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Misiones 💕</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #f8e8f4 0%, #ede0ff 50%, #fce4ec 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* ===== iPHONE FRAME ===== */
+.iphone-wrap {
+  position: relative;
+  width: 393px;
+  filter: drop-shadow(0 40px 80px rgba(100,0,80,0.3));
+}
+
+.iphone-frame {
+  width: 393px;
+  height: 852px;
+  background: #1c1c1e;
+  border-radius: 55px;
+  padding: 14px;
+  box-shadow:
+    0 0 0 1.5px #3a3a3c,
+    inset 0 0 0 1.5px #48484a;
+  position: relative;
+}
+
+.iphone-screen {
+  width: 100%;
+  height: 100%;
+  background: #fff5fb;
+  border-radius: 43px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dynamic Island */
+.dynamic-island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 37px;
+  background: #1c1c1e;
+  border-radius: 20px;
+  z-index: 300;
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  height: 54px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 30px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  position: relative;
+  z-index: 200;
+  color: #1a1a2e;
+}
+
+.status-icons { display: flex; gap: 5px; align-items: center; font-size: 13px; }
+
+/* ===== PUSH NOTIFICATION ===== */
+.push-notification {
+  position: absolute;
+  top: 62px;
+  left: 14px;
+  right: 14px;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 18px;
+  padding: 13px 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  transform: translateY(-110px);
+  opacity: 0;
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.push-notification.show { transform: translateY(0); opacity: 1; }
+
+.pn-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, #E8A4C9, #B5A4E8);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.pn-app { font-size: 11px; color: #9c7ba8; font-weight: 700; letter-spacing: 0.2px; }
+.pn-title { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+.pn-body { font-size: 13px; color: #6b5b7a; }
+.pn-close {
+  margin-left: auto; color: #ccc; font-size: 18px;
+  cursor: pointer; flex-shrink: 0; line-height: 1;
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #fff5fb;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: none;
+  padding-bottom: 88px;
+  scroll-behavior: smooth;
+}
+.screen::-webkit-scrollbar { display: none; }
+.screen.active { display: block; }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  height: 83px;
+  flex-shrink: 0;
+  background: rgba(255,245,251,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(232, 164, 201, 0.25);
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 10px;
+  z-index: 100;
+}
+
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 0 8px;
+  opacity: 0.45; transition: all 0.2s ease;
+  -webkit-user-select: none; user-select: none;
+}
+.tab-item.active { opacity: 1; }
+.tab-icon { font-size: 25px; transition: transform 0.2s ease; }
+.tab-item.active .tab-icon { transform: scale(1.12); }
+.tab-label { font-size: 10px; font-weight: 600; color: #c06090; }
+.tab-item.active .tab-label { color: #b04080; font-weight: 800; }
+
+/* ===== SHARED COMPONENTS ===== */
+.screen-title {
+  font-size: 30px; font-weight: 800; color: #2d1b2e;
+  letter-spacing: -0.5px;
+}
+.screen-subtitle { font-size: 14px; color: #9c7ba8; margin-top: 3px; }
+
+.section-label {
+  font-size: 13px; font-weight: 700; color: #b08ab8;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 12px 22px 8px;
+}
+
+.pill-tabs {
+  display: flex; gap: 8px;
+  padding: 10px 22px; overflow-x: auto;
+}
+.pill-tabs::-webkit-scrollbar { display: none; }
+
+.pill {
+  padding: 7px 15px; border-radius: 22px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; transition: all 0.2s;
+  border: 1.5px solid #e8d5f0; background: white; color: #9c7ba8;
+  flex-shrink: 0;
+}
+.pill.active {
+  background: linear-gradient(135deg, #E8A4C9, #B5A4E8);
+  color: white; border-color: transparent;
+  box-shadow: 0 3px 12px rgba(232,164,201,0.4);
+}
+
+/* Mission Cards */
+.mission-card {
+  margin: 0 16px 9px;
+  background: white; border-radius: 17px;
+  padding: 13px 15px 13px 18px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 2px 12px rgba(180,80,130,0.07);
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.15s;
+  -webkit-user-select: none; user-select: none;
+}
+.mission-card:active { transform: scale(0.98); }
+
+.mission-card::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 4.5px;
+  border-radius: 17px 0 0 17px;
+}
+.mc-urgent::before   { background: #FF6B6B; }
+.mc-important::before { background: #FFA94D; }
+.mc-normal::before   { background: #FFCC44; }
+.mc-low::before      { background: #51CF66; }
+
+.mc-dot {
+  width: 38px; height: 38px; border-radius: 19px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; flex-shrink: 0;
+}
+.mc-urgent .mc-dot   { background: #FFF0F0; }
+.mc-important .mc-dot { background: #FFF5EA; }
+.mc-normal .mc-dot   { background: #FFFCE0; }
+.mc-low .mc-dot      { background: #EAFFF0; }
+
+.mc-info { flex: 1; min-width: 0; }
+.mc-title { font-size: 15px; font-weight: 600; color: #2d1b2e; }
+.mc-title.done { text-decoration: line-through; color: #b0a0b8; }
+.mc-meta {
+  font-size: 11.5px; color: #9c7ba8;
+  margin-top: 3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.mc-badge {
+  background: #F0E8FF; color: #7C3AED;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+}
+.mc-badge.shared { background: #FFE8F4; color: #C0396A; }
+
+.mc-check {
+  width: 26px; height: 26px; border-radius: 13px;
+  border: 2px solid #ddc5e8; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0; font-size: 14px;
+}
+.mc-check.checked { background: #E8A4C9; border-color: #E8A4C9; color: white; }
+
+/* ===== HOME SCREEN ===== */
+.home-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 18px 22px 0;
+}
+.home-bell {
+  width: 46px; height: 46px; background: white; border-radius: 23px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21px; box-shadow: 0 3px 14px rgba(180,80,130,0.13);
+  cursor: pointer; position: relative; flex-shrink: 0;
+}
+.home-bell .dot {
+  position: absolute; top: 9px; right: 9px;
+  width: 10px; height: 10px; background: #FF6B6B;
+  border-radius: 5px; border: 2.5px solid #fff5fb;
+}
+
+.stat-row { display: flex; gap: 10px; padding: 14px 16px; }
+.stat-card {
+  flex: 1; background: white; border-radius: 20px;
+  padding: 15px 14px 13px;
+  box-shadow: 0 2px 12px rgba(180,80,130,0.08);
+}
+.stat-card.hot { background: linear-gradient(135deg, #FF6B6B, #FF8E8E); }
+.stat-icon { font-size: 22px; }
+.stat-num { font-size: 34px; font-weight: 800; color: #2d1b2e; line-height: 1.1; }
+.stat-card.hot .stat-num { color: white; }
+.stat-lbl { font-size: 11px; color: #b08ab8; margin-top: 2px; }
+.stat-card.hot .stat-lbl { color: rgba(255,255,255,0.85); }
+
+.pet-preview {
+  margin: 0 16px 6px;
+  background: linear-gradient(135deg, #c4a4e8, #e8a4c9);
+  border-radius: 22px; padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer; box-shadow: 0 5px 22px rgba(181,164,232,0.38);
+  transition: transform 0.15s;
+}
+.pet-preview:active { transform: scale(0.98); }
+.pp-ava {
+  width: 62px; height: 62px; background: rgba(255,255,255,0.3);
+  border-radius: 31px; display: flex; align-items: center; justify-content: center;
+  font-size: 38px; flex-shrink: 0;
+}
+.pp-info { flex: 1; }
+.pp-name { font-size: 16px; font-weight: 700; color: white; }
+.pp-msg { font-size: 12.5px; color: rgba(255,255,255,0.88); margin-top: 3px; line-height: 1.35; }
+.pp-bar { height: 5px; background: rgba(255,255,255,0.3); border-radius: 3px; margin-top: 9px; overflow: hidden; }
+.pp-fill { height: 100%; background: white; border-radius: 3px; width: 72%; }
+.pp-arrow { color: white; font-size: 20px; flex-shrink: 0; }
+
+/* ===== CALENDAR SCREEN ===== */
+.cal-widget {
+  margin: 4px 16px 0;
+  background: white; border-radius: 22px; padding: 18px 16px;
+  box-shadow: 0 3px 18px rgba(180,80,130,0.09);
+}
+.cal-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.cal-month { font-size: 19px; font-weight: 800; color: #2d1b2e; }
+.cal-btn {
+  width: 34px; height: 34px; border-radius: 17px;
+  background: #f5e8ff; border: none; cursor: pointer;
+  font-size: 17px; color: #9c7ba8; display: flex; align-items: center; justify-content: center;
+}
+.cal-wdays { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 8px; }
+.cal-wd { text-align: center; font-size: 11px; font-weight: 700; color: #c0a0cc; padding: 3px 0; }
+.cal-cells { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500; color: #2d1b2e;
+  border-radius: 50%; cursor: pointer; position: relative;
+  transition: all 0.2s;
+}
+.cal-cell:hover { background: #f5e8ff; }
+.cal-cell.other { color: #d8b8e8; }
+.cal-cell.today {
+  background: linear-gradient(135deg, #E8A4C9, #B5A4E8);
+  color: white; font-weight: 800;
+}
+.cal-cell.has-event::after {
+  content: ''; position: absolute; bottom: 3px;
+  width: 5px; height: 5px; border-radius: 50%; background: #E8A4C9;
+}
+.cal-cell.today.has-event::after { background: rgba(255,255,255,0.8); }
+.cal-cell.selected:not(.today) { background: #f0e0ff; color: #7c3aed; font-weight: 700; }
+
+.day-events { margin: 16px 16px 0; }
+.de-title { font-size: 17px; font-weight: 800; color: #2d1b2e; margin-bottom: 10px; }
+.de-item {
+  display: flex; align-items: center; gap: 13px;
+  background: white; border-radius: 15px; padding: 12px 15px;
+  margin-bottom: 8px; box-shadow: 0 2px 9px rgba(180,80,130,0.07);
+}
+.de-time { font-size: 12px; color: #9c7ba8; font-weight: 700; min-width: 42px; }
+.de-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.de-text { font-size: 14px; color: #2d1b2e; font-weight: 500; }
+.de-who { font-size: 11px; color: #b08ab8; margin-left: auto; }
+
+/* ===== MISSIONS SCREEN ===== */
+.ms-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 18px 22px 0;
+}
+.add-btn {
+  width: 46px; height: 46px; border-radius: 23px;
+  background: linear-gradient(135deg, #E8A4C9, #B5A4E8);
+  border: none; font-size: 26px; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 5px 18px rgba(232,164,201,0.48);
+  transition: transform 0.15s;
+}
+.add-btn:active { transform: scale(0.92); }
+
+/* Modal */
+.modal-bg {
+  position: absolute; inset: 0;
+  background: rgba(40,0,60,0.38); z-index: 600;
+  display: none; align-items: flex-end;
+}
+.modal-bg.open { display: flex; }
+
+.modal-sheet {
+  background: #fff5fb; border-radius: 28px 28px 0 0;
+  padding: 0 20px 30px; width: 100%;
+  max-height: 88%;
+  overflow-y: auto;
+  animation: slideUp 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.modal-sheet::-webkit-scrollbar { display: none; }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle {
+  width: 42px; height: 5px; background: #e0ccea;
+  border-radius: 3px; margin: 14px auto 20px;
+}
+.modal-title { font-size: 22px; font-weight: 800; color: #2d1b2e; margin-bottom: 20px; }
+
+.f-group { margin-bottom: 17px; }
+.f-label { font-size: 13px; font-weight: 700; color: #9c7ba8; margin-bottom: 7px; display: block; }
+.f-input {
+  width: 100%; background: white;
+  border: 1.8px solid #e8d5f0; border-radius: 13px;
+  padding: 12px 14px; font-size: 15px; color: #2d1b2e;
+  outline: none; font-family: inherit; transition: border-color 0.2s;
+}
+.f-input:focus { border-color: #E8A4C9; }
+.f-input.err { border-color: #FF6B6B; }
+textarea.f-input { resize: none; }
+
+.urg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.urg-opt {
+  padding: 11px 13px; border-radius: 13px;
+  cursor: pointer; display: flex; align-items: center; gap: 9px;
+  border: 2.5px solid transparent; transition: all 0.2s;
+  font-size: 13px; font-weight: 600;
+}
+.urg-opt.u { background: #FFF0F0; color: #FF6B6B; }
+.urg-opt.i { background: #FFF5EA; color: #F08030; }
+.urg-opt.n { background: #FFFCE0; color: #C09000; }
+.urg-opt.l { background: #EAFFF0; color: #2A7D40; }
+.urg-opt.sel { border-color: currentColor; box-shadow: 0 2px 10px currentColor; }
+
+.whom-row { display: flex; gap: 9px; }
+.whom-opt {
+  flex: 1; padding: 11px 8px; background: white;
+  border-radius: 13px; border: 2px solid #e8d5f0;
+  cursor: pointer; text-align: center;
+  font-size: 13px; font-weight: 600; color: #9c7ba8;
+  transition: all 0.2s;
+}
+.whom-opt.sel {
+  background: linear-gradient(135deg, #E8A4C9, #B5A4E8);
+  color: white; border-color: transparent;
+}
+
+.submit-btn {
+  width: 100%; padding: 17px; border: none; border-radius: 17px;
+  background: linear-gradient(135deg, #E8A4C9, #B5A4E8);
+  color: white; font-size: 17px; font-weight: 800; cursor: pointer;
+  margin-top: 10px; box-shadow: 0 6px 22px rgba(232,164,201,0.42);
+  transition: transform 0.15s;
+}
+.submit-btn:active { transform: scale(0.97); }
+.cancel-btn {
+  width: 100%; padding: 13px; background: transparent; border: none;
+  color: #9c7ba8; font-size: 15px; cursor: pointer; margin-top: 6px;
+}
+
+/* ===== PET SCREEN ===== */
+.pet-main {
+  margin: 12px 16px 0;
+  background: linear-gradient(145deg, #ead8ff, #ffcce8);
+  border-radius: 26px; padding: 26px 20px 22px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.pet-sparkle1 {
+  position: absolute; top: 12px; left: 20px; font-size: 22px;
+  animation: floatA 3.2s ease-in-out infinite;
+}
+.pet-sparkle2 {
+  position: absolute; top: 18px; right: 22px; font-size: 18px;
+  animation: floatA 3.2s ease-in-out infinite 1.2s;
+}
+.pet-sparkle3 {
+  position: absolute; bottom: 14px; left: 30px; font-size: 16px;
+  animation: floatA 3.2s ease-in-out infinite 0.6s;
+}
+
+@keyframes floatA {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-9px) rotate(5deg); }
+}
+
+.pet-big {
+  font-size: 96px; display: inline-block;
+  animation: petBounce 2.4s ease-in-out infinite;
+  cursor: pointer;
+}
+@keyframes petBounce {
+  0%,100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+
+.pet-name-big { font-size: 26px; font-weight: 900; color: #5b2d7a; }
+.pet-mood-txt { font-size: 14px; color: #8540b0; margin: 5px 0 14px; }
+.pet-bar-outer { background: rgba(255,255,255,0.45); border-radius: 10px; height: 11px; overflow: hidden; margin: 0 16px; }
+.pet-bar-inner {
+  height: 100%; border-radius: 10px;
+  background: linear-gradient(90deg, #E8A4C9, #B5A4E8);
+  width: 72%; transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+.pet-pct { font-size: 12px; color: #8540b0; margin-top: 7px; font-weight: 600; }
+
+.pet-bubble {
+  margin: 14px 16px;
+  background: white; border-radius: 20px; border-bottom-left-radius: 5px;
+  padding: 15px 17px; box-shadow: 0 3px 14px rgba(180,80,130,0.1);
+}
+.pet-bubble-text { font-size: 14px; color: #2d1b2e; line-height: 1.55; }
+.pet-bubble-time { font-size: 11px; color: #b08ab8; margin-top: 7px; }
+
+.pet-actions-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 0 16px 14px; }
+.pet-act {
+  background: white; border-radius: 18px; padding: 18px 8px 14px;
+  text-align: center; cursor: pointer;
+  box-shadow: 0 2px 11px rgba(180,80,130,0.09); border: none;
+  transition: all 0.2s;
+}
+.pet-act:active { transform: scale(0.93); }
+.pet-act-ico { font-size: 32px; }
+.pet-act-lbl { font-size: 11px; font-weight: 700; color: #9c7ba8; margin-top: 7px; }
+
+.pet-hist-item {
+  display: flex; align-items: flex-start; gap: 11px;
+  margin: 0 16px 9px; background: white;
+  border-radius: 15px; padding: 13px 14px;
+  box-shadow: 0 2px 9px rgba(180,80,130,0.07);
+}
+.phi-who { font-size: 26px; }
+.phi-info .phi-name { font-size: 11px; font-weight: 800; color: #E8A4C9; }
+.phi-info .phi-action { font-size: 13px; color: #2d1b2e; margin-top: 2px; }
+.phi-info .phi-time { font-size: 11px; color: #b08ab8; margin-top: 3px; }
+
+/* ===== PLANS SCREEN ===== */
+.plans-featured {
+  margin: 8px 16px 14px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-radius: 22px; padding: 20px 20px 18px;
+  position: relative; overflow: hidden;
+}
+.plans-featured::after {
+  content: ''; position: absolute;
+  right: -30px; top: -30px;
+  width: 130px; height: 130px;
+  background: rgba(255,255,255,0.09); border-radius: 65px;
+}
+.feat-badge {
+  background: rgba(255,255,255,0.22); color: white;
+  font-size: 11px; font-weight: 700; padding: 4px 12px;
+  border-radius: 20px; display: inline-block; margin-bottom: 10px;
+}
+.feat-title { font-size: 22px; font-weight: 900; color: white; }
+.feat-desc { font-size: 13px; color: rgba(255,255,255,0.83); margin-top: 6px; line-height: 1.45; }
+.feat-actions { display: flex; gap: 9px; margin-top: 15px; }
+.feat-btn {
+  padding: 9px 18px; border-radius: 22px;
+  font-size: 13px; font-weight: 800; cursor: pointer; border: none;
+  transition: transform 0.15s;
+}
+.feat-btn:active { transform: scale(0.95); }
+.feat-btn.pri { background: white; color: #6366f1; }
+.feat-btn.sec { background: rgba(255,255,255,0.2); color: white; }
+
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; padding: 0 16px; }
+
+.plan-card {
+  background: white; border-radius: 20px; overflow: hidden;
+  box-shadow: 0 3px 14px rgba(180,80,130,0.09); cursor: pointer;
+  transition: transform 0.15s;
+}
+.plan-card:active { transform: scale(0.97); }
+
+.plan-img {
+  height: 88px; display: flex; align-items: center;
+  justify-content: center; font-size: 46px;
+}
+.plan-body { padding: 10px 12px 13px; }
+.plan-title { font-size: 13px; font-weight: 800; color: #2d1b2e; }
+.plan-meta { font-size: 11px; color: #9c7ba8; margin-top: 3px; }
+.plan-btns { display: flex; gap: 7px; margin-top: 9px; }
+.plan-btn {
+  flex: 1; padding: 7px 5px; border-radius: 11px;
+  border: none; cursor: pointer; font-size: 13px; font-weight: 700;
+  transition: all 0.2s;
+}
+.plan-btn.lk { background: #FFE8F4; color: #E8A4C9; }
+.plan-btn.sv { background: #EDE8FF; color: #B5A4E8; }
+.plan-btn.lk.done { background: #FF6B6B; color: white; }
+.plan-btn.sv.done { background: #B5A4E8; color: white; font-size: 11px; }
+
+/* ===== RESPONSIVE (real phone) ===== */
+@media (max-width: 420px) {
+  body { background: #fff5fb; padding: 0; align-items: flex-start; }
+  .iphone-wrap { filter: none; }
+  .iphone-frame { width: 100vw; height: 100dvh; border-radius: 0; padding: 0; box-shadow: none; }
+  .iphone-screen { border-radius: 0; }
+  .dynamic-island { display: none; }
+  .status-bar { padding-top: 10px; }
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(40,0,60,0.85); color: white; padding: 10px 20px;
+  border-radius: 22px; font-size: 13px; font-weight: 600;
+  opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 800;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== STREAKS BANNER ===== */
+.streak-banner {
+  margin: 0 16px 6px;
+  background: linear-gradient(135deg, #fff3cd, #ffe8a3);
+  border-radius: 17px; padding: 13px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.sb-ico { font-size: 26px; }
+.sb-text h4 { font-size: 14px; font-weight: 800; color: #7a4500; }
+.sb-text p { font-size: 12px; color: #a06020; margin-top: 2px; }
+
+</style>
+</head>
+<body>
+
+<div class="iphone-wrap">
+<div class="iphone-frame">
+<div class="iphone-screen">
+
+  <!-- Dynamic Island -->
+  <div class="dynamic-island"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span id="statusTime">9:41</span>
+    <div class="status-icons">
+      <span>⚡</span><span>📶</span><span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Push Notification -->
+  <div class="push-notification" id="pushNotif">
+    <div class="pn-icon" id="pnIcon">🎯</div>
+    <div style="flex:1; min-width:0;">
+      <div class="pn-app">Misiones 💕</div>
+      <div class="pn-title" id="pnTitle">¡Nueva misión de Ana!</div>
+      <div class="pn-body" id="pnBody">Comprar flores para el jueves 🌸</div>
+    </div>
+    <span class="pn-close" onclick="closePush()">×</span>
+  </div>
+
+  <!-- App Container -->
+  <div class="app-container" id="appCont">
+
+    <!-- ===== HOME ===== -->
+    <div class="screen active" id="sc-home">
+      <div class="home-head">
+        <div>
+          <div class="screen-title">Hola, Claudia 👋</div>
+          <div class="screen-subtitle">Miércoles, 15 de abril</div>
+        </div>
+        <div class="home-bell" onclick="triggerPush('🔔','¡Buenas tardes!','Tienes 2 misiones urgentes pendientes 🔥')">
+          🔔
+          <div class="dot"></div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card hot">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-num">2</div>
+          <div class="stat-lbl">Urgentes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-num">7</div>
+          <div class="stat-lbl">Total hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-num">3</div>
+          <div class="stat-lbl">Hechas</div>
+        </div>
+      </div>
+
+      <div class="streak-banner">
+        <div class="sb-ico">🔥</div>
+        <div class="sb-text">
+          <h4>¡12 días seguidas! Increíble</h4>
+          <p>Seguís siendo las mejores dueñas de Mochi 💕</p>
+        </div>
+      </div>
+
+      <div class="pet-preview" onclick="switchTab('mascota')">
+        <div class="pp-ava">🐱</div>
+        <div class="pp-info">
+          <div class="pp-name">Mochi está contento 😊</div>
+          <div class="pp-msg">"¡Recordad que me debéis<br>un abrazo hoy!"</div>
+          <div class="pp-bar"><div class="pp-fill"></div></div>
+        </div>
+        <div class="pp-arrow">›</div>
+      </div>
+
+      <div class="section-label">🌅 Misiones de hoy</div>
+
+      <div class="mission-card mc-urgent">
+        <div class="mc-dot">🔴</div>
+        <div class="mc-info">
+          <div class="mc-title" id="ht1">Llamar al médico</div>
+          <div class="mc-meta">
+            <span>⏰ Antes de las 12h</span>
+            <span class="mc-badge">De: Ana</span>
+          </div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'ht1')"></div>
+      </div>
+
+      <div class="mission-card mc-important">
+        <div class="mc-dot">🟠</div>
+        <div class="mc-info">
+          <div class="mc-title" id="ht2">Comprar ingredientes para cenar</div>
+          <div class="mc-meta">
+            <span>📅 Hoy por la tarde</span>
+            <span class="mc-badge shared">Compartida</span>
+          </div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'ht2')"></div>
+      </div>
+
+      <div class="mission-card mc-normal">
+        <div class="mc-dot">🟡</div>
+        <div class="mc-info">
+          <div class="mc-title" id="ht3">Reservar mesa para el viernes</div>
+          <div class="mc-meta"><span>📅 Antes del miércoles</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'ht3')"></div>
+      </div>
+
+      <div class="mission-card mc-low">
+        <div class="mc-dot">🟢</div>
+        <div class="mc-info">
+          <div class="mc-title" id="ht4">Empezar Stranger Things juntas</div>
+          <div class="mc-meta">
+            <span>📅 Esta semana</span>
+            <span class="mc-badge shared">Compartida</span>
+          </div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'ht4')"></div>
+      </div>
+
+      <div style="text-align:center; padding:14px 0 4px; color:#E8A4C9; font-size:14px; font-weight:700; cursor:pointer;" onclick="switchTab('misiones')">
+        Ver todas las misiones →
+      </div>
+    </div>
+
+    <!-- ===== CALENDARIO ===== -->
+    <div class="screen" id="sc-calendario">
+      <div style="padding: 18px 22px 0;">
+        <div class="screen-title">Calendario 📅</div>
+      </div>
+
+      <div class="pill-tabs">
+        <div class="pill active" onclick="pickPill(this)">📱 El mío</div>
+        <div class="pill" onclick="pickPill(this)">💕 Juntas</div>
+        <div class="pill" onclick="pickPill(this)">👩‍❤️‍👩 De Ana</div>
+      </div>
+
+      <div class="cal-widget">
+        <div class="cal-nav">
+          <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+          <span class="cal-month" id="calMonthLabel">Abril 2026</span>
+          <button class="cal-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-wdays">
+          <div class="cal-wd">L</div><div class="cal-wd">M</div><div class="cal-wd">X</div>
+          <div class="cal-wd">J</div><div class="cal-wd">V</div><div class="cal-wd">S</div>
+          <div class="cal-wd">D</div>
+        </div>
+        <div class="cal-cells" id="calGrid"></div>
+      </div>
+
+      <div class="day-events" id="dayEventsContainer">
+        <div class="de-title" id="dayEventsTitle">Eventos del 15 de abril</div>
+        <div class="de-item">
+          <div class="de-time">09:00</div>
+          <div class="de-dot" style="background:#FF6B6B"></div>
+          <div class="de-text">Llamar al médico</div>
+          <div class="de-who">📱 Ana</div>
+        </div>
+        <div class="de-item">
+          <div class="de-time">13:00</div>
+          <div class="de-dot" style="background:#FFA94D"></div>
+          <div class="de-text">Comprar ingredientes</div>
+          <div class="de-who">💕 Juntas</div>
+        </div>
+        <div class="de-item">
+          <div class="de-time">20:00</div>
+          <div class="de-dot" style="background:#E8A4C9"></div>
+          <div class="de-text">🍝 Cena romántica en casa</div>
+          <div class="de-who">💕 Juntas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MISIONES ===== -->
+    <div class="screen" id="sc-misiones">
+      <div class="ms-head">
+        <div>
+          <div class="screen-title">Misiones 🎯</div>
+          <div class="screen-subtitle">6 pendientes · 3 completadas</div>
+        </div>
+        <button class="add-btn" onclick="openModal()">+</button>
+      </div>
+
+      <div class="pill-tabs">
+        <div class="pill active" onclick="pickPill(this)">Todas</div>
+        <div class="pill" onclick="pickPill(this)">🔴 Urgente</div>
+        <div class="pill" onclick="pickPill(this)">🟠 Importante</div>
+        <div class="pill" onclick="pickPill(this)">🟡 Normal</div>
+        <div class="pill" onclick="pickPill(this)">🟢 Sin prisa</div>
+        <div class="pill" onclick="pickPill(this)">👩 De Ana</div>
+      </div>
+
+      <div class="section-label">🔴 Urgentes</div>
+
+      <div class="mission-card mc-urgent">
+        <div class="mc-dot">🔴</div>
+        <div class="mc-info">
+          <div class="mc-title" id="m1">Llamar al médico</div>
+          <div class="mc-meta"><span>⏰ Hoy antes de las 12h</span><span class="mc-badge">De: Ana</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'m1')"></div>
+      </div>
+
+      <div class="mission-card mc-urgent">
+        <div class="mc-dot">🔴</div>
+        <div class="mc-info">
+          <div class="mc-title" id="m2">Renovar el seguro del coche</div>
+          <div class="mc-meta"><span>📅 Mañana, 16 abr</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'m2')"></div>
+      </div>
+
+      <div class="section-label">🟠 Importantes</div>
+
+      <div class="mission-card mc-important">
+        <div class="mc-dot">🟠</div>
+        <div class="mc-info">
+          <div class="mc-title" id="m3">Comprar ingredientes para cenar</div>
+          <div class="mc-meta"><span>📅 Hoy</span><span class="mc-badge shared">Compartida</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'m3')"></div>
+      </div>
+
+      <div class="mission-card mc-important">
+        <div class="mc-dot">🟠</div>
+        <div class="mc-info">
+          <div class="mc-title" id="m4">Reservar mesa para el viernes</div>
+          <div class="mc-meta"><span>📅 Antes del miércoles</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'m4')"></div>
+      </div>
+
+      <div class="section-label">🟡 Normales</div>
+
+      <div class="mission-card mc-normal">
+        <div class="mc-dot">🟡</div>
+        <div class="mc-info">
+          <div class="mc-title" id="m5">Organizar el armario</div>
+          <div class="mc-meta"><span>📅 Esta semana</span><span class="mc-badge">De: Ana</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'m5')"></div>
+      </div>
+
+      <div class="section-label">🟢 Sin prisa</div>
+
+      <div class="mission-card mc-low">
+        <div class="mc-dot">🟢</div>
+        <div class="mc-info">
+          <div class="mc-title" id="m6">Empezar Stranger Things juntas</div>
+          <div class="mc-meta"><span>📅 Cuando podamos</span><span class="mc-badge shared">Compartida</span></div>
+        </div>
+        <div class="mc-check" onclick="toggleCheck(this,'m6')"></div>
+      </div>
+
+      <!-- Completadas -->
+      <div class="section-label" style="color:#b0d0b0;">✅ Completadas</div>
+
+      <div class="mission-card" style="opacity:0.55;">
+        <div class="mc-dot" style="background:#eee;">✅</div>
+        <div class="mc-info">
+          <div class="mc-title" style="text-decoration:line-through; color:#b0a0b8;">Recoger el paquete de Correos</div>
+          <div class="mc-meta"><span>Completada ayer</span></div>
+        </div>
+      </div>
+
+      <!-- Add Mission Modal -->
+      <div class="modal-bg" id="missionModal">
+        <div class="modal-sheet">
+          <div class="modal-handle"></div>
+          <div class="modal-title">Nueva Misión ✨</div>
+
+          <div class="f-group">
+            <label class="f-label">¿Qué hay que hacer?</label>
+            <input class="f-input" id="mTitle" placeholder="Ej: Comprar flores...">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Descripción (opcional)</label>
+            <textarea class="f-input" id="mDesc" rows="2" placeholder="Añade más detalles..."></textarea>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Fecha y hora</label>
+            <input class="f-input" type="datetime-local" id="mDate">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Nivel de urgencia</label>
+            <div class="urg-grid">
+              <div class="urg-opt u sel" onclick="pickUrg(this)"><span>🔴</span><span>Urgente</span></div>
+              <div class="urg-opt i" onclick="pickUrg(this)"><span>🟠</span><span>Importante</span></div>
+              <div class="urg-opt n" onclick="pickUrg(this)"><span>🟡</span><span>Normal</span></div>
+              <div class="urg-opt l" onclick="pickUrg(this)"><span>🟢</span><span>Sin prisa</span></div>
+            </div>
+          </div>
+          <div class="f-group">
+            <label class="f-label">¿Para quién?</label>
+            <div class="whom-row">
+              <div class="whom-opt sel" onclick="pickWhom(this)">Para mí</div>
+              <div class="whom-opt" onclick="pickWhom(this)">Para Ana</div>
+              <div class="whom-opt" onclick="pickWhom(this)">Las dos</div>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="submitMission()">¡Añadir Misión! 🎯</button>
+          <button class="cancel-btn" onclick="closeModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MASCOTA ===== -->
+    <div class="screen" id="sc-mascota">
+      <div style="padding: 18px 22px 0;">
+        <div class="screen-title">Mochi 🐱</div>
+        <div class="screen-subtitle">Vuestra mascota virtual</div>
+      </div>
+
+      <div style="height: 12px;"></div>
+
+      <div class="pet-main">
+        <div class="pet-sparkle1">✨</div>
+        <div class="pet-sparkle2">💕</div>
+        <div class="pet-sparkle3">⭐</div>
+        <div class="pet-big" id="petBig" onclick="petAction('hug')">🐱</div>
+        <div class="pet-name-big">Mochi</div>
+        <div class="pet-mood-txt" id="petMoodTxt">Contento y bien cuidado 😊</div>
+        <div class="pet-bar-outer">
+          <div class="pet-bar-inner" id="petBar"></div>
+        </div>
+        <div class="pet-pct" id="petPct">Felicidad: 72%</div>
+      </div>
+
+      <div class="pet-bubble">
+        <div class="pet-bubble-text" id="petMsg">💕 "¡Hola mis dos personas favoritas! Hoy me siento muy querido porque me habéis dado de comer y jugado conmigo. Os quiero muchísimo, sois las mejores dueñas del universo~ ¿Me dais otro abrazo?"</div>
+        <div class="pet-bubble-time">Hace 2 horas</div>
+      </div>
+
+      <div class="section-label">Cuidar a Mochi</div>
+
+      <div class="pet-actions-grid">
+        <button class="pet-act" onclick="petAction('feed')">
+          <div class="pet-act-ico">🍣</div>
+          <div class="pet-act-lbl">Dar de comer</div>
+        </button>
+        <button class="pet-act" onclick="petAction('cuddle')">
+          <div class="pet-act-ico">🤗</div>
+          <div class="pet-act-lbl">Acariciar</div>
+        </button>
+        <button class="pet-act" onclick="petAction('play')">
+          <div class="pet-act-ico">🎾</div>
+          <div class="pet-act-lbl">Jugar</div>
+        </button>
+      </div>
+
+      <div class="section-label">Últimas actividades</div>
+
+      <div class="pet-hist-item">
+        <div class="phi-who">🧑‍💼</div>
+        <div class="phi-info">
+          <div class="phi-name">Ana</div>
+          <div class="phi-action">Le dio de comer a Mochi 🍣</div>
+          <div class="phi-time">Hace 2 horas</div>
+        </div>
+      </div>
+      <div class="pet-hist-item">
+        <div class="phi-who">👩</div>
+        <div class="phi-info">
+          <div class="phi-name">Tú (Claudia)</div>
+          <div class="phi-action">Jugaste con Mochi 🎾</div>
+          <div class="phi-time">Hace 5 horas</div>
+        </div>
+      </div>
+      <div class="pet-hist-item">
+        <div class="phi-who">🧑‍💼</div>
+        <div class="phi-info">
+          <div class="phi-name">Ana</div>
+          <div class="phi-action">Acarició a Mochi 🤗</div>
+          <div class="phi-time">Ayer por la noche</div>
+        </div>
+      </div>
+      <div class="pet-hist-item">
+        <div class="phi-who">👩</div>
+        <div class="phi-info">
+          <div class="phi-name">Tú (Claudia)</div>
+          <div class="phi-action">Le diste un abrazo a Mochi 💝</div>
+          <div class="phi-time">Ayer por la mañana</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PLANES ===== -->
+    <div class="screen" id="sc-planes">
+      <div style="padding: 18px 22px 0;">
+        <div class="screen-title">Planes 🌟</div>
+        <div class="screen-subtitle">Ideas para disfrutar juntas</div>
+      </div>
+
+      <div class="pill-tabs">
+        <div class="pill active" onclick="pickPill(this)">🌟 Todo</div>
+        <div class="pill" onclick="pickPill(this)">🎬 Pelis</div>
+        <div class="pill" onclick="pickPill(this)">🎮 Juegos</div>
+        <div class="pill" onclick="pickPill(this)">🌍 Salidas</div>
+        <div class="pill" onclick="pickPill(this)">❤️ Citas</div>
+        <div class="pill" onclick="pickPill(this)">💾 Guardadas</div>
+      </div>
+
+      <div class="plans-featured">
+        <div class="feat-badge">✨ Recomendado esta semana</div>
+        <div class="feat-title">Noche de película 🍿</div>
+        <div class="feat-desc">"Everything Everywhere All at Once" — una locura filosófica y emotiva perfecta para ver juntas con palomitas.</div>
+        <div class="feat-actions">
+          <button class="feat-btn pri" onclick="showToast('¡Plan guardado! 💾')">💾 Guardar plan</button>
+          <button class="feat-btn sec" onclick="nextFeatured(this)">Otra idea →</button>
+        </div>
+      </div>
+
+      <div class="section-label">Más ideas para vosotras</div>
+
+      <div class="plan-grid">
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#667eea18,#764ba218)">🎮</div>
+          <div class="plan-body">
+            <div class="plan-title">It Takes Two</div>
+            <div class="plan-meta">🎮 Juego cooperativo</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#f093fb18,#f5576c18)">🎬</div>
+          <div class="plan-body">
+            <div class="plan-title">La La Land</div>
+            <div class="plan-meta">🎬 Película romántica</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#4facfe18,#00f2fe18)">🧁</div>
+          <div class="plan-body">
+            <div class="plan-title">Noche repostera</div>
+            <div class="plan-meta">🍽️ Plan en casa</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#43e97b18,#38f9d718)">🌿</div>
+          <div class="plan-body">
+            <div class="plan-title">Senderismo</div>
+            <div class="plan-meta">🏃 Salida al aire libre</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#fa709a18,#fee14018)">🔍</div>
+          <div class="plan-body">
+            <div class="plan-title">Escape Room</div>
+            <div class="plan-meta">🧩 Aventura en pareja</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#a18cd118,#fbc2eb18)">🎲</div>
+          <div class="plan-body">
+            <div class="plan-title">Noche de juegos</div>
+            <div class="plan-meta">🎲 Catan, Dixit...</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#ffd89b18,#19547b18)">🍜</div>
+          <div class="plan-body">
+            <div class="plan-title">Probar restaurante nuevo</div>
+            <div class="plan-meta">🍽️ Cita gastronómica</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-img" style="background:linear-gradient(135deg,#ee9ca718,#ffdde118)">🎨</div>
+          <div class="plan-body">
+            <div class="plan-title">Taller de cerámica</div>
+            <div class="plan-meta">🎨 Actividad creativa</div>
+            <div class="plan-btns">
+              <button class="plan-btn lk" onclick="likeBtn(this)">❤️</button>
+              <button class="plan-btn sv" onclick="saveBtn(this)">💾</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="height: 20px;"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+  </div><!-- /app-container -->
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('home')">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-label">Inicio</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('calendario')">
+      <div class="tab-icon">📅</div>
+      <div class="tab-label">Calendario</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('misiones')">
+      <div class="tab-icon">🎯</div>
+      <div class="tab-label">Misiones</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('mascota')">
+      <div class="tab-icon">🐱</div>
+      <div class="tab-label">Mochi</div>
+    </div>
+    <div class="tab-item" onclick="switchTab('planes')">
+      <div class="tab-icon">🌟</div>
+      <div class="tab-label">Planes</div>
+    </div>
+  </div>
+
+</div><!-- /iphone-screen -->
+</div><!-- /iphone-frame -->
+</div><!-- /iphone-wrap -->
+
+<script>
+// ===== TIME =====
+function updateTime() {
+  const n = new Date();
+  const t = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('statusTime').textContent = t;
+}
+updateTime(); setInterval(updateTime, 5000);
+
+// ===== TAB SWITCHING =====
+const tabIds = ['home','calendario','misiones','mascota','planes'];
+function switchTab(name) {
+  tabIds.forEach(id => {
+    document.getElementById('sc-'+id).classList.remove('active');
+  });
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('sc-'+name).classList.add('active');
+  document.querySelectorAll('.tab-item')[tabIds.indexOf(name)].classList.add('active');
+}
+
+// ===== PILL TABS =====
+function pickPill(el) {
+  const group = el.parentElement;
+  group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ===== PUSH NOTIFICATION =====
+let pushTimer;
+function triggerPush(icon, title, body) {
+  document.getElementById('pnIcon').textContent = icon;
+  document.getElementById('pnTitle').textContent = title;
+  document.getElementById('pnBody').textContent = body;
+  const el = document.getElementById('pushNotif');
+  el.classList.add('show');
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => el.classList.remove('show'), 4500);
+}
+function closePush() {
+  document.getElementById('pushNotif').classList.remove('show');
+  clearTimeout(pushTimer);
+}
+// Auto notification on load
+setTimeout(() => triggerPush('🎯','¡Nueva misión de Ana!','Comprar flores para el jueves 🌸'), 1800);
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== MISSION CHECKBOX =====
+function toggleCheck(el, titleId) {
+  el.classList.toggle('checked');
+  if(el.classList.contains('checked')) {
+    el.textContent = '✓';
+    const titleEl = document.getElementById(titleId);
+    if(titleEl) titleEl.classList.add('done');
+    showToast('¡Misión completada! ✅');
+  } else {
+    el.textContent = '';
+    const titleEl = document.getElementById(titleId);
+    if(titleEl) titleEl.classList.remove('done');
+  }
+}
+
+// ===== ADD MISSION MODAL =====
+function openModal() {
+  document.getElementById('missionModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('missionModal').classList.remove('open');
+}
+function pickUrg(el) {
+  el.closest('.urg-grid').querySelectorAll('.urg-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function pickWhom(el) {
+  el.closest('.whom-row').querySelectorAll('.whom-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function submitMission() {
+  const title = document.getElementById('mTitle').value.trim();
+  const input = document.getElementById('mTitle');
+  if(!title) {
+    input.classList.add('err');
+    input.placeholder = '¡Escribe algo primero!';
+    setTimeout(() => { input.classList.remove('err'); input.placeholder = 'Ej: Comprar flores...'; }, 2000);
+    return;
+  }
+  const whom = document.querySelector('.whom-opt.sel')?.textContent || 'Para mí';
+  closeModal();
+  input.value = '';
+  document.getElementById('mDesc').value = '';
+
+  if(whom === 'Para Ana' || whom === 'Las dos') {
+    setTimeout(() => triggerPush('🎯', '¡Nueva misión enviada!', title + ' — Ana ha sido notificada 💕'), 600);
+  } else {
+    showToast('¡Misión añadida! 🎯');
+  }
+}
+
+// ===== CALENDAR =====
+let calYear = 2026, calMonth = 3; // April (0-indexed)
+const eventDays = { '2026-3': [3,7,12,15,18,22,25,28], '2026-4': [2,8,14,20,27] };
+const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function buildCalendar() {
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calMonthLabel');
+  if(!grid) return;
+  grid.innerHTML = '';
+  label.textContent = monthNames[calMonth] + ' ' + calYear;
+
+  const first = new Date(calYear, calMonth, 1);
+  const last = new Date(calYear, calMonth+1, 0);
+  const today = new Date(2026, 3, 15);
+
+  let startDay = first.getDay(); // 0=Sun
+  startDay = startDay === 0 ? 6 : startDay - 1; // Mon=0
+
+  const events = eventDays[calYear+'-'+calMonth] || [];
+
+  // Prev month fill
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+  for(let i = 0; i < startDay; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-cell other';
+    d.textContent = prevLast - startDay + 1 + i;
+    grid.appendChild(d);
+  }
+
+  // Current month
+  for(let i = 1; i <= last.getDate(); i++) {
+    const d = document.createElement('div');
+    const isToday = i === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+    const hasEv = events.includes(i);
+    d.className = 'cal-cell' + (isToday ? ' today' : '') + (hasEv ? ' has-event' : '');
+    d.textContent = i;
+    d.onclick = () => selectCalDay(i, d);
+    grid.appendChild(d);
+  }
+
+  // Next month fill
+  const total = startDay + last.getDate();
+  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for(let i = 1; i <= rem; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-cell other';
+    d.textContent = i;
+    grid.appendChild(d);
+  }
+}
+
+function selectCalDay(day, el) {
+  document.querySelectorAll('.cal-cell.selected').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const title = document.getElementById('dayEventsTitle');
+  if(title) title.textContent = 'Eventos del ' + day + ' de ' + monthNames[calMonth].toLowerCase();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if(calMonth > 11) { calMonth = 0; calYear++; }
+  if(calMonth < 0)  { calMonth = 11; calYear--; }
+  buildCalendar();
+}
+
+buildCalendar();
+
+// ===== PET =====
+let petHappiness = 72;
+const petMsgs = {
+  feed:   [
+    '😸 "¡Ñam ñam! ¡Esto estaba deliciosísimo! ¡Sois las mejores dueñas del mundo entero!"',
+    '🍣 "¡Míaaam! Mi plato favorito. ¡Me habéis mimado tanto que me voy a poner a ronronear toda la noche!"',
+    '😻 "¡Gracias gracias gracias! Mi barriga ya está feliz. ¡Os quiero con todo mi corazón de gatito!"',
+  ],
+  cuddle: [
+    '😻 "Purrr purrr purrr... Me encanta cuando me hacéis carantoñas. ¡No paréis NUNCA!"',
+    '💕 "¡Mmm, esto es la vida! Quedaos así para siempre. Sois mi todo~ purr~"',
+    '🥰 "¡Ayyy que me derrito! Sois las personas más cariñosas del universo."',
+  ],
+  play:   [
+    '🎾 "¡Weee! ¡Otra vez otra vez! ¡Sois las mejores compañeras de juegos del universo!"',
+    '😹 "¡Ja ja ja! ¡Siempre ganáis! Pero no me importa porque me lo paso genial con vosotras~"',
+    '🐱 "¡Eso eso! ¡Por aquí! ¡Ahí ahí! ¡Soy MUY rápido... o no! ¡Jeje! ¡Jugad más conmigo!"',
+  ],
+  hug:    [
+    '💝 "¡ABRAZO! ¡Esto es lo mejor del mundo! No me soltéis nunca jamás de los jamases~"',
+    '😺 "Ronroneo activado al máximo. ¡Sois mi familia favorita!"',
+  ],
+};
+
+const petMoodLabels = [
+  [0,  30, 'Tristón y abandonado 😿', '#ccc'],
+  [30, 60, 'Un poco solo... 😿',       '#f0c040'],
+  [60, 80, 'Contento y bien cuidado 😊','#B5A4E8'],
+  [80,101, '¡Super feliz! 🥳',          '#E8A4C9'],
+];
+
+function updatePetUI() {
+  const bar = document.getElementById('petBar');
+  const pct = document.getElementById('petPct');
+  const txt = document.getElementById('petMoodTxt');
+  if(bar) bar.style.width = petHappiness + '%';
+  if(pct) pct.textContent = 'Felicidad: ' + petHappiness + '%';
+  const lbl = petMoodLabels.find(m => petHappiness >= m[0] && petHappiness < m[1]);
+  if(txt && lbl) txt.textContent = lbl[2];
+}
+
+function petAction(type) {
+  const msgs = petMsgs[type] || petMsgs.hug;
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+  const msgEl = document.getElementById('petMsg');
+  if(msgEl) { msgEl.style.opacity = 0; setTimeout(() => { msgEl.textContent = msg; msgEl.style.opacity = 1; msgEl.style.transition = 'opacity 0.4s'; }, 200); }
+
+  petHappiness = Math.min(100, petHappiness + Math.floor(Math.random() * 8) + 5);
+  updatePetUI();
+
+  const ava = document.getElementById('petBig');
+  if(ava) {
+    ava.style.transform = 'scale(1.35) rotate(15deg)';
+    setTimeout(() => ava.style.transform = '', 380);
+  }
+  showToast(type === 'feed' ? '¡Mochi comió! 🍣' : type === 'play' ? '¡Mochi jugó! 🎾' : type === 'cuddle' ? '¡Mochi fue acariciado! 🤗' : '¡Mochi recibió un abrazo! 💕');
+}
+
+// Pet auto-complain after a while
+setTimeout(() => {
+  if(petHappiness < 60) {
+    triggerPush('🐱','Mochi os echa de menos...','Lleváis mucho sin cuidarme 😿');
+  }
+}, 15000);
+
+// ===== PLAN CARDS =====
+const featuredPlans = [
+  { title: 'Noche de película 🍿', desc: '"Everything Everywhere All at Once" — filosofía y amor en un viaje multidimensional. ¡Con palomitas!' },
+  { title: 'Picnic en el parque 🧺', desc: 'El tiempo está perfecto esta semana. Llevad mantita, fruta y algo rico para comer al aire libre.' },
+  { title: 'Maratón de Studio Ghibli 🎌', desc: 'Empezad por "El viaje de Chihiro" y acabad con "La princesa Mononoke". Una noche mágica garantizada.' },
+  { title: 'Cocinar algo nuevo juntas 🍜', desc: 'Elegid una receta que ninguna haya hecho nunca. El proceso es parte de la diversión~' },
+];
+let featIdx = 0;
+
+function nextFeatured(btn) {
+  featIdx = (featIdx + 1) % featuredPlans.length;
+  const plan = featuredPlans[featIdx];
+  const card = btn.closest('.plans-featured');
+  card.querySelector('.feat-title').textContent = plan.title;
+  card.querySelector('.feat-desc').textContent = plan.desc;
+}
+
+function likeBtn(btn) {
+  btn.classList.add('done');
+  btn.textContent = '❤️';
+  showToast('¡Guardado como favorito! ❤️');
+}
+
+function saveBtn(btn) {
+  btn.classList.add('done');
+  btn.textContent = '✓';
+  showToast('¡Plan guardado! 💾');
+}
+
+</script>
+</body>
+</html>

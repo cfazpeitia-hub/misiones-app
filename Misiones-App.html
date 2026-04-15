@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Misiones">
+<meta name="theme-color" content="#E8A4C9">
+<title>Misiones 💕</title>
+
+<!-- iOS home screen icon (emoji SVG) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23E8A4C9'/%3E%3Ctext y='.9em' font-size='72' x='14'>🎯%3C/text%3E%3C/svg%3E">
+
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  background: #fff5fb;
+  display: flex; flex-direction: column;
+  height: 100dvh;
+}
+
+/* ===== SAFE AREAS (iPhone notch / home bar) ===== */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ===== STATUS BAR / HEADER ===== */
+.app-header {
+  padding: calc(var(--safe-top) + 10px) 20px 10px;
+  background: rgba(255,245,251,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  flex-shrink: 0;
+  z-index: 50;
+  border-bottom: 1px solid rgba(232,164,201,0.15);
+  display: flex; justify-content: space-between; align-items: flex-end; min-height: 60px;
+}
+.app-header h1 { font-size: 20px; font-weight: 800; color: #2d1b2e; }
+.app-header .hdate { font-size: 12px; color: #9c7ba8; margin-top: 1px; }
+.hbell {
+  width: 40px; height: 40px; background: white; border-radius: 20px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  box-shadow: 0 2px 10px rgba(180,80,130,0.12); cursor: pointer; position: relative; flex-shrink: 0;
+}
+.hbell .dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 9px; height: 9px; background: #FF6B6B;
+  border-radius: 50%; border: 2px solid #fff5fb;
+}
+
+/* ===== PUSH NOTIFICATION ===== */
+.push-notif {
+  position: fixed; top: calc(var(--safe-top) + 8px); left: 10px; right: 10px;
+  background: rgba(255,255,255,0.96); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border-radius: 16px; padding: 12px 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.18); z-index: 2000;
+  display: flex; align-items: center; gap: 11px;
+  transform: translateY(calc(-1 * var(--safe-top) - 100px));
+  opacity: 0; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.push-notif.show { transform: translateY(0); opacity: 1; }
+.pn-ico { width: 40px; height: 40px; background: linear-gradient(135deg,#E8A4C9,#B5A4E8); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.pn-app { font-size: 10px; color: #9c7ba8; font-weight: 700; }
+.pn-title { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+.pn-body { font-size: 12px; color: #6b5b7a; }
+.pn-x { margin-left: auto; color: #ccc; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+
+/* ===== APP BODY ===== */
+.app-body { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  display: none; padding-bottom: calc(var(--safe-bottom) + 80px);
+  background: #fff5fb;
+}
+.screen::-webkit-scrollbar { display: none; }
+.screen.active { display: block; }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  flex-shrink: 0;
+  background: rgba(255,245,251,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(232,164,201,0.2);
+  display: flex; justify-content: space-around; align-items: flex-start;
+  padding: 10px 0 calc(var(--safe-bottom) + 2px); z-index: 100;
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 0 10px; opacity: 0.4; transition: all 0.2s;
+  -webkit-user-select: none; user-select: none; position: relative;
+}
+.tab-item.active { opacity: 1; }
+.tab-icon { font-size: 24px; transition: transform 0.2s; }
+.tab-item.active .tab-icon { transform: scale(1.12); }
+.tab-label { font-size: 10px; font-weight: 600; color: #c06090; }
+.tab-item.active .tab-label { color: #b04080; font-weight: 800; }
+.tab-badge {
+  position: absolute; top: -2px; right: 4px;
+  background: #FF6B6B; color: white; font-size: 9px; font-weight: 800;
+  width: 16px; height: 16px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center;
+  border: 2px solid #fff5fb;
+}
+.tab-badge.show { display: flex; }
+
+/* ===== COMMON ===== */
+.section-title { font-size: 28px; font-weight: 800; color: #2d1b2e; letter-spacing: -0.5px; }
+.section-sub { font-size: 13px; color: #9c7ba8; margin-top: 2px; }
+.screen-head { padding: 16px 18px 0; }
+
+.sec-label { font-size: 12px; font-weight: 700; color: #b08ab8; text-transform: uppercase; letter-spacing: 0.8px; padding: 12px 18px 6px; }
+
+.pill-row { display: flex; gap: 7px; padding: 10px 18px; overflow-x: auto; }
+.pill-row::-webkit-scrollbar { display: none; }
+.pill {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  border: 1.5px solid #e8d5f0; background: white; color: #9c7ba8; flex-shrink: 0;
+}
+.pill.on { background: linear-gradient(135deg,#E8A4C9,#B5A4E8); color: white; border-color: transparent; box-shadow: 0 3px 10px rgba(232,164,201,0.35); }
+
+/* ===== MISSION CARD ===== */
+.mc {
+  margin: 0 14px 8px;
+  background: white; border-radius: 16px; padding: 12px 14px 12px 17px;
+  display: flex; align-items: center; gap: 11px;
+  box-shadow: 0 2px 10px rgba(180,80,130,0.07); position: relative; overflow: hidden;
+  transition: transform 0.15s, opacity 0.3s;
+}
+.mc::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:16px 0 0 16px; }
+.mc.u::before { background:#FF6B6B; }
+.mc.i::before { background:#FFA94D; }
+.mc.n::before { background:#FFCC44; }
+.mc.l::before { background:#51CF66; }
+.mc.done { opacity: 0.5; }
+
+.mc-dot { width:36px; height:36px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.mc.u .mc-dot { background:#FFF0F0; }
+.mc.i .mc-dot { background:#FFF5EA; }
+.mc.n .mc-dot { background:#FFFCE0; }
+.mc.l .mc-dot { background:#EAFFF0; }
+
+.mc-info { flex:1; min-width:0; }
+.mc-ttl { font-size:14px; font-weight:600; color:#2d1b2e; }
+.mc-ttl.done { text-decoration:line-through; color:#b0a0b8; }
+.mc-meta { font-size:11px; color:#9c7ba8; margin-top:3px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.mc-badge { background:#F0E8FF; color:#7C3AED; font-size:9px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.mc-badge.sh { background:#FFE8F4; color:#C0396A; }
+
+.mc-ck {
+  width:25px; height:25px; border-radius:13px; border:2px solid #ddc5e8;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; flex-shrink:0; font-size:13px;
+}
+.mc-ck.on { background:#E8A4C9; border-color:#E8A4C9; color:white; }
+
+.mc-del {
+  width:25px; height:25px; border-radius:13px; background:#FFE8F4; border:none;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:12px; color:#FF6B6B; flex-shrink:0; transition: transform 0.15s;
+}
+.mc-del:active { transform: scale(0.9); }
+
+/* ===== STAT ROW ===== */
+.stat-row { display:flex; gap:9px; padding:12px 14px; }
+.stat-card { flex:1; background:white; border-radius:18px; padding:14px 12px 11px; box-shadow:0 2px 10px rgba(180,80,130,0.07); }
+.stat-card.hot { background:linear-gradient(135deg,#FF6B6B,#FF8E8E); }
+.s-ico { font-size:20px; }
+.s-num { font-size:30px; font-weight:800; color:#2d1b2e; line-height:1.1; }
+.stat-card.hot .s-num { color:white; }
+.s-lbl { font-size:10px; color:#b08ab8; margin-top:1px; }
+.stat-card.hot .s-lbl { color:rgba(255,255,255,0.85); }
+
+/* ===== PET PREVIEW ===== */
+.pet-prev {
+  margin:0 14px 8px;
+  background:linear-gradient(135deg,#c4a4e8,#e8a4c9);
+  border-radius:20px; padding:14px 16px;
+  display:flex; align-items:center; gap:13px; cursor:pointer;
+  box-shadow:0 5px 20px rgba(181,164,232,0.35); transition:transform 0.15s;
+}
+.pet-prev:active { transform:scale(0.98); }
+.pp-ava { width:56px; height:56px; background:rgba(255,255,255,0.28); border-radius:28px; display:flex; align-items:center; justify-content:center; font-size:34px; flex-shrink:0; }
+.pp-i { flex:1; }
+.pp-name { font-size:15px; font-weight:700; color:white; }
+.pp-msg { font-size:12px; color:rgba(255,255,255,0.88); margin-top:2px; line-height:1.35; }
+.pp-bar { height:5px; background:rgba(255,255,255,0.3); border-radius:3px; margin-top:8px; overflow:hidden; }
+.pp-fill { height:100%; background:white; border-radius:3px; transition:width 0.5s; }
+
+/* ===== STREAK ===== */
+.streak { margin:0 14px 8px; background:linear-gradient(135deg,#fff3cd,#ffe8a3); border-radius:16px; padding:12px 15px; display:flex; align-items:center; gap:11px; }
+.str-ico { font-size:24px; }
+.str-t { font-size:13px; font-weight:800; color:#7a4500; }
+.str-s { font-size:11px; color:#a06020; margin-top:2px; }
+
+/* ===== CALENDAR ===== */
+.cal-widget { margin:4px 14px 0; background:white; border-radius:20px; padding:16px 14px; box-shadow:0 3px 16px rgba(180,80,130,0.08); }
+.cal-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.cal-month-name { font-size:18px; font-weight:800; color:#2d1b2e; }
+.cal-nb { width:32px; height:32px; border-radius:16px; background:#f5e8ff; border:none; cursor:pointer; font-size:16px; color:#9c7ba8; }
+.cal-wds { display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+.cal-wd { text-align:center; font-size:10px; font-weight:700; color:#c0a0cc; padding:3px 0; }
+.cal-cells { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-cell {
+  aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:500; color:#2d1b2e; border-radius:50%; cursor:pointer;
+  position:relative; transition:all 0.2s;
+}
+.cal-cell.other { color:#d8b8e8; }
+.cal-cell.today { background:linear-gradient(135deg,#E8A4C9,#B5A4E8); color:white; font-weight:800; }
+.cal-cell.has-ev::after { content:''; position:absolute; bottom:2px; width:4px; height:4px; border-radius:50%; background:#E8A4C9; }
+.cal-cell.today.has-ev::after { background:rgba(255,255,255,0.8); }
+.cal-cell.sel:not(.today) { background:#f0e0ff; color:#7c3aed; font-weight:700; }
+
+.day-evs { margin:14px 14px 0; }
+.de-title { font-size:16px; font-weight:800; color:#2d1b2e; margin-bottom:9px; }
+.de-item { display:flex; align-items:center; gap:12px; background:white; border-radius:14px; padding:11px 14px; margin-bottom:7px; box-shadow:0 2px 8px rgba(180,80,130,0.06); }
+.de-t { font-size:11px; color:#9c7ba8; font-weight:700; min-width:40px; }
+.de-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.de-txt { font-size:13px; color:#2d1b2e; font-weight:500; }
+.de-who { font-size:10px; color:#b08ab8; margin-left:auto; white-space:nowrap; }
+
+/* ===== MODAL ===== */
+.modal-bg { position:fixed; inset:0; background:rgba(40,0,60,0.4); z-index:600; display:none; align-items:flex-end; }
+.modal-bg.open { display:flex; }
+.modal-sheet {
+  background:#fff5fb; border-radius:26px 26px 0 0;
+  padding:0 18px calc(var(--safe-bottom) + 20px);
+  width:100%; max-height:90vh; overflow-y:auto;
+  animation:slideUp 0.35s cubic-bezier(0.34,1.2,0.64,1);
+}
+.modal-sheet::-webkit-scrollbar { display:none; }
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-handle { width:40px; height:4px; background:#e0ccea; border-radius:2px; margin:13px auto 18px; }
+.modal-title { font-size:21px; font-weight:800; color:#2d1b2e; margin-bottom:18px; }
+.f-group { margin-bottom:15px; }
+.f-label { font-size:12px; font-weight:700; color:#9c7ba8; margin-bottom:6px; display:block; }
+.f-input {
+  width:100%; background:white; border:1.8px solid #e8d5f0; border-radius:12px;
+  padding:11px 13px; font-size:15px; color:#2d1b2e; outline:none; font-family:inherit;
+  transition:border-color 0.2s; -webkit-appearance:none;
+}
+.f-input:focus { border-color:#E8A4C9; }
+.f-input.err { border-color:#FF6B6B; }
+textarea.f-input { resize:none; }
+.urg-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.urg-opt { padding:10px 12px; border-radius:12px; cursor:pointer; display:flex; align-items:center; gap:8px; border:2.5px solid transparent; transition:all 0.2s; font-size:13px; font-weight:600; }
+.urg-opt.u { background:#FFF0F0; color:#FF6B6B; } .urg-opt.i { background:#FFF5EA; color:#F08030; }
+.urg-opt.n { background:#FFFCE0; color:#C09000; } .urg-opt.l { background:#EAFFF0; color:#2A7D40; }
+.urg-opt.sel { border-color:currentColor; }
+.whom-row { display:flex; gap:8px; }
+.whom-opt { flex:1; padding:10px 8px; background:white; border-radius:12px; border:2px solid #e8d5f0; cursor:pointer; text-align:center; font-size:13px; font-weight:600; color:#9c7ba8; transition:all 0.2s; }
+.whom-opt.sel { background:linear-gradient(135deg,#E8A4C9,#B5A4E8); color:white; border-color:transparent; }
+.submit-btn { width:100%; padding:16px; border:none; border-radius:16px; background:linear-gradient(135deg,#E8A4C9,#B5A4E8); color:white; font-size:16px; font-weight:800; cursor:pointer; margin-top:10px; box-shadow:0 5px 18px rgba(232,164,201,0.4); }
+.cancel-btn { width:100%; padding:12px; background:transparent; border:none; color:#9c7ba8; font-size:14px; cursor:pointer; margin-top:5px; }
+
+/* ===== PET SCREEN ===== */
+.pet-main { margin:12px 14px 0; background:linear-gradient(145deg,#ead8ff,#ffcce8); border-radius:24px; padding:24px 18px 20px; text-align:center; position:relative; overflow:hidden; }
+.pet-sp1 { position:absolute; top:10px; left:18px; font-size:20px; animation:floatSp 3s ease-in-out infinite; }
+.pet-sp2 { position:absolute; top:15px; right:20px; font-size:17px; animation:floatSp 3s ease-in-out infinite 1.2s; }
+.pet-sp3 { position:absolute; bottom:12px; left:26px; font-size:15px; animation:floatSp 3s ease-in-out infinite 0.6s; }
+@keyframes floatSp { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-8px) rotate(5deg)} }
+.pet-ava-big { font-size:88px; display:inline-block; animation:petB 2.5s ease-in-out infinite; cursor:pointer; }
+@keyframes petB { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-10px) rotate(3deg)} }
+.pet-nname { font-size:24px; font-weight:900; color:#5b2d7a; }
+.pet-mood-txt { font-size:13px; color:#8540b0; margin:4px 0 12px; }
+.pet-bar-out { background:rgba(255,255,255,0.4); border-radius:8px; height:10px; overflow:hidden; margin:0 14px; }
+.pet-bar-in { height:100%; border-radius:8px; background:linear-gradient(90deg,#E8A4C9,#B5A4E8); transition:width 0.6s cubic-bezier(0.34,1.2,0.64,1); }
+.pet-pct { font-size:12px; color:#8540b0; margin-top:6px; font-weight:600; }
+
+.pet-bubble { margin:13px 14px; background:white; border-radius:18px; border-bottom-left-radius:4px; padding:14px 16px; box-shadow:0 3px 12px rgba(180,80,130,0.09); }
+.pet-msg { font-size:14px; color:#2d1b2e; line-height:1.55; transition:opacity 0.3s; }
+.pet-time { font-size:11px; color:#b08ab8; margin-top:6px; }
+
+.pet-acts { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:0 14px 12px; }
+.pet-act { background:white; border-radius:16px; padding:16px 6px 12px; text-align:center; cursor:pointer; box-shadow:0 2px 10px rgba(180,80,130,0.08); border:none; transition:transform 0.2s; }
+.pet-act:active { transform:scale(0.92); }
+.pa-ico { font-size:30px; }
+.pa-lbl { font-size:10px; font-weight:700; color:#9c7ba8; margin-top:6px; }
+
+.pet-hist { margin:0 14px 8px; background:white; border-radius:14px; padding:12px 13px; box-shadow:0 2px 8px rgba(180,80,130,0.06); display:flex; align-items:flex-start; gap:10px; }
+.ph-who { font-size:24px; }
+.ph-n { font-size:10px; font-weight:800; color:#E8A4C9; }
+.ph-a { font-size:13px; color:#2d1b2e; margin-top:1px; }
+.ph-t { font-size:10px; color:#b08ab8; margin-top:2px; }
+
+/* ===== PLANS ===== */
+.feat-card { margin:8px 14px 12px; background:linear-gradient(135deg,#6366f1,#a855f7); border-radius:20px; padding:18px; position:relative; overflow:hidden; }
+.feat-card::after { content:''; position:absolute; right:-25px; top:-25px; width:120px; height:120px; background:rgba(255,255,255,0.09); border-radius:60px; }
+.feat-badge { background:rgba(255,255,255,0.22); color:white; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; margin-bottom:8px; }
+.feat-title { font-size:20px; font-weight:900; color:white; }
+.feat-desc { font-size:12.5px; color:rgba(255,255,255,0.83); margin-top:5px; line-height:1.45; }
+.feat-acts { display:flex; gap:8px; margin-top:12px; }
+.feat-btn { padding:8px 16px; border-radius:20px; font-size:12px; font-weight:800; cursor:pointer; border:none; transition:transform 0.15s; }
+.feat-btn:active { transform:scale(0.95); }
+.feat-btn.pri { background:white; color:#6366f1; }
+.feat-btn.sec { background:rgba(255,255,255,0.2); color:white; }
+
+.plan-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px; }
+.plan-card { background:white; border-radius:18px; overflow:hidden; box-shadow:0 3px 12px rgba(180,80,130,0.08); cursor:pointer; transition:transform 0.15s; }
+.plan-card:active { transform:scale(0.97); }
+.plan-img { height:84px; display:flex; align-items:center; justify-content:center; font-size:44px; }
+.plan-body { padding:9px 11px 12px; }
+.plan-title { font-size:13px; font-weight:800; color:#2d1b2e; }
+.plan-meta { font-size:11px; color:#9c7ba8; margin-top:2px; }
+.plan-btns { display:flex; gap:6px; margin-top:8px; }
+.plan-btn { flex:1; padding:6px 4px; border-radius:10px; border:none; cursor:pointer; font-size:12px; font-weight:700; transition:all 0.2s; }
+.plan-btn.lk { background:#FFE8F4; color:#E8A4C9; }
+.plan-btn.sv { background:#EDE8FF; color:#B5A4E8; }
+.plan-btn.lk.on { background:#FF6B6B; color:white; }
+.plan-btn.sv.on { background:#B5A4E8; color:white; font-size:10px; }
+
+/* ===== SETUP SCREEN ===== */
+.setup-card { margin:14px 14px 10px; background:white; border-radius:20px; padding:20px 18px; box-shadow:0 3px 14px rgba(180,80,130,0.1); }
+.setup-card h3 { font-size:16px; font-weight:800; color:#2d1b2e; margin-bottom:4px; }
+.setup-card p { font-size:13px; color:#9c7ba8; line-height:1.55; }
+.setup-step { display:flex; gap:12px; margin:12px 0; }
+.step-num { width:28px; height:28px; background:linear-gradient(135deg,#E8A4C9,#B5A4E8); border-radius:14px; display:flex; align-items:center; justify-content:center; color:white; font-size:13px; font-weight:800; flex-shrink:0; }
+.step-txt { font-size:13px; color:#2d1b2e; line-height:1.5; flex:1; }
+.step-txt strong { color:#2d1b2e; }
+.step-txt a { color:#E8A4C9; text-decoration:none; }
+
+.setup-info { margin:14px 14px 10px; background:linear-gradient(135deg,#E8F8FF,#E8F0FF); border-radius:16px; padding:14px 16px; }
+.setup-info h4 { font-size:14px; font-weight:800; color:#1a4080; margin-bottom:6px; }
+.setup-info p { font-size:12.5px; color:#2a5090; line-height:1.5; }
+
+/* ===== ADD MISSIONS BTN ===== */
+.add-btn {
+  width:44px; height:44px; border-radius:22px;
+  background:linear-gradient(135deg,#E8A4C9,#B5A4E8);
+  border:none; font-size:24px; color:white; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 16px rgba(232,164,201,0.45); transition:transform 0.15s; flex-shrink:0;
+}
+.add-btn:active { transform:scale(0.92); }
+
+.ms-head { display:flex; justify-content:space-between; align-items:flex-start; padding:16px 18px 0; }
+
+/* ===== SETTINGS SCREEN ===== */
+.settings-row { margin:0 14px 8px; background:white; border-radius:14px; padding:13px 16px; box-shadow:0 2px 8px rgba(180,80,130,0.06); display:flex; align-items:center; gap:13px; cursor:pointer; }
+.sr-ico { font-size:22px; width:38px; text-align:center; }
+.sr-info { flex:1; }
+.sr-title { font-size:14px; font-weight:600; color:#2d1b2e; }
+.sr-sub { font-size:12px; color:#9c7ba8; margin-top:1px; }
+.sr-arr { color:#ddc5e8; font-size:18px; }
+
+/* ===== TOAST ===== */
+.toast {
+  position:fixed; bottom:calc(var(--safe-bottom) + 90px); left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:rgba(40,0,60,0.88); color:white; padding:9px 20px;
+  border-radius:22px; font-size:13px; font-weight:600;
+  opacity:0; transition:all 0.3s; pointer-events:none; white-space:nowrap; z-index:1500;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ===== EMPTY STATE ===== */
+.empty-state { text-align:center; padding:40px 30px; }
+.empty-state .es-ico { font-size:48px; margin-bottom:12px; }
+.empty-state h3 { font-size:18px; font-weight:700; color:#2d1b2e; }
+.empty-state p { font-size:14px; color:#9c7ba8; margin-top:6px; line-height:1.5; }
+
+/* Desktop: show phone frame */
+@media (min-width: 500px) {
+  body {
+    background:linear-gradient(135deg,#f8e8f4,#ede0ff,#fce4ec);
+    justify-content:center; align-items:center;
+    height:100vh; overflow:hidden;
+  }
+  .phone-wrap {
+    width:390px; height:844px;
+    background:#1c1c1e; border-radius:54px; padding:14px;
+    box-shadow:0 0 0 1.5px #3a3a3c, 0 40px 80px rgba(100,0,80,0.3);
+    position:relative; display:flex; flex-direction:column;
+    overflow:hidden; flex-shrink:0;
+  }
+  .phone-screen {
+    flex:1; background:#fff5fb; border-radius:42px;
+    overflow:hidden; display:flex; flex-direction:column; min-height:0;
+  }
+  .dyn-island { position:absolute; top:22px; left:50%; transform:translateX(-50%); width:124px; height:35px; background:#1c1c1e; border-radius:20px; z-index:300; pointer-events:none; }
+  body { padding: 0; }
+  .push-notif { position:absolute; top:65px; left:12px; right:12px; }
+  .toast { position:absolute; bottom:calc(var(--safe-bottom) + 90px); }
+}
+@media (max-width: 499px) {
+  .phone-wrap { display:contents; }
+  .phone-screen { display:contents; }
+  .dyn-island { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-wrap">
+<div class="dyn-island"></div>
+<div class="phone-screen">
+
+<!-- Push Notification -->
+<div class="push-notif" id="pushNotif">
+  <div class="pn-ico" id="pnIco">🎯</div>
+  <div style="flex:1;min-width:0">
+    <div class="pn-app">Misiones 💕</div>
+    <div class="pn-title" id="pnTitle">¡Nueva misión!</div>
+    <div class="pn-body" id="pnBody">Tienes una misión pendiente</div>
+  </div>
+  <span class="pn-x" onclick="closePush()">×</span>
+</div>
+
+<!-- Header -->
+<div class="app-header" id="appHeader">
+  <div>
+    <div id="hTitle" style="font-size:20px;font-weight:800;color:#2d1b2e;">Hola, Claudia 👋</div>
+    <div id="hDate" style="font-size:12px;color:#9c7ba8;margin-top:1px;"></div>
+  </div>
+  <div class="hbell" onclick="bellClick()">
+    🔔
+    <div class="dot" id="bellDot"></div>
+  </div>
+</div>
+
+<!-- App Body -->
+<div class="app-body">
+
+  <!-- ===== HOME ===== -->
+  <div class="screen active" id="sc-home">
+    <div class="stat-row" id="statRow">
+      <div class="stat-card hot"><div class="s-ico">🔥</div><div class="s-num" id="urgCount">0</div><div class="s-lbl">Urgentes</div></div>
+      <div class="stat-card"><div class="s-ico">📋</div><div class="s-num" id="todayCount">0</div><div class="s-lbl">Hoy</div></div>
+      <div class="stat-card"><div class="s-ico">✅</div><div class="s-num" id="doneCount">0</div><div class="s-lbl">Hechas</div></div>
+    </div>
+
+    <div class="streak">
+      <div class="str-ico">🔥</div>
+      <div>
+        <div class="str-t" id="streakTxt">¡Seguís genial!</div>
+        <div class="str-s">Sois las mejores dueñas de Mochi 💕</div>
+      </div>
+    </div>
+
+    <div class="pet-prev" onclick="switchTab('mascota')">
+      <div class="pp-ava">🐱</div>
+      <div class="pp-i">
+        <div class="pp-name" id="ppName">Mochi está feliz 😊</div>
+        <div class="pp-msg" id="ppMsg">"¡Hola! ¡Acordaos de cuidarme!"</div>
+        <div class="pp-bar"><div class="pp-fill" id="ppFill" style="width:72%"></div></div>
+      </div>
+      <span style="color:white;font-size:18px;flex-shrink:0;">›</span>
+    </div>
+
+    <div class="sec-label">🌅 Misiones de hoy</div>
+    <div id="homeList"></div>
+
+    <div style="text-align:center;padding:12px 0 4px;color:#E8A4C9;font-size:13px;font-weight:700;cursor:pointer;" onclick="switchTab('misiones')">
+      Ver todas las misiones →
+    </div>
+  </div>
+
+  <!-- ===== CALENDARIO ===== -->
+  <div class="screen" id="sc-calendario">
+    <div class="screen-head">
+      <div class="section-title">Calendario 📅</div>
+    </div>
+    <div class="pill-row">
+      <div class="pill on" onclick="pickPill(this)">📱 El mío</div>
+      <div class="pill" onclick="pickPill(this)">💕 Juntas</div>
+      <div class="pill" onclick="pickPill(this)">👩‍❤️‍👩 De <span id="partnerPill">Ana</span></div>
+    </div>
+    <div class="cal-widget">
+      <div class="cal-nav">
+        <button class="cal-nb" onclick="changeMonth(-1)">‹</button>
+        <span class="cal-month-name" id="calLabel">Abril 2026</span>
+        <button class="cal-nb" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-wds">
+        <div class="cal-wd">L</div><div class="cal-wd">M</div><div class="cal-wd">X</div>
+        <div class="cal-wd">J</div><div class="cal-wd">V</div><div class="cal-wd">S</div>
+        <div class="cal-wd">D</div>
+      </div>
+      <div class="cal-cells" id="calGrid"></div>
+    </div>
+    <div class="day-evs">
+      <div class="de-title" id="dayTitle">Eventos de hoy</div>
+      <div id="dayEventsList"></div>
+    </div>
+  </div>
+
+  <!-- ===== MISIONES ===== -->
+  <div class="screen" id="sc-misiones">
+    <div class="ms-head">
+      <div>
+        <div class="section-title">Misiones 🎯</div>
+        <div class="section-sub" id="msSubtitle">Cargando...</div>
+      </div>
+      <button class="add-btn" onclick="openModal()">+</button>
+    </div>
+    <div class="pill-row" id="filterPills">
+      <div class="pill on" onclick="setFilter('all',this)">Todas</div>
+      <div class="pill" onclick="setFilter('u',this)">🔴 Urgente</div>
+      <div class="pill" onclick="setFilter('i',this)">🟠 Importante</div>
+      <div class="pill" onclick="setFilter('n',this)">🟡 Normal</div>
+      <div class="pill" onclick="setFilter('l',this)">🟢 Sin prisa</div>
+      <div class="pill" onclick="setFilter('partner',this)">👩 De <span id="partnerFilter">Ana</span></div>
+    </div>
+    <div id="missionsList"></div>
+
+    <!-- Modal -->
+    <div class="modal-bg" id="mModal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Nueva Misión ✨</div>
+        <div class="f-group">
+          <label class="f-label">¿Qué hay que hacer?</label>
+          <input class="f-input" id="mTitle" placeholder="Ej: Comprar flores...">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Descripción (opcional)</label>
+          <textarea class="f-input" id="mDesc" rows="2" placeholder="Más detalles..."></textarea>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Fecha límite</label>
+          <input class="f-input" type="datetime-local" id="mDate">
+        </div>
+        <div class="f-group">
+          <label class="f-label">Urgencia</label>
+          <div class="urg-grid">
+            <div class="urg-opt u sel" onclick="pickUrg(this,'u')"><span>🔴</span><span>Urgente</span></div>
+            <div class="urg-opt i" onclick="pickUrg(this,'i')"><span>🟠</span><span>Importante</span></div>
+            <div class="urg-opt n" onclick="pickUrg(this,'n')"><span>🟡</span><span>Normal</span></div>
+            <div class="urg-opt l" onclick="pickUrg(this,'l')"><span>🟢</span><span>Sin prisa</span></div>
+          </div>
+        </div>
+        <div class="f-group">
+          <label class="f-label">¿Para quién?</label>
+          <div class="whom-row">
+            <div class="whom-opt sel" onclick="pickWhom(this,'me')">Para mí</div>
+            <div class="whom-opt" id="wPartner" onclick="pickWhom(this,'partner')">Para Ana</div>
+            <div class="whom-opt" onclick="pickWhom(this,'both')">Las dos</div>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="addMission()">¡Añadir Misión! 🎯</button>
+        <button class="cancel-btn" onclick="closeModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MASCOTA ===== -->
+  <div class="screen" id="sc-mascota">
+    <div class="screen-head">
+      <div class="section-title" id="petScreenTitle">Mochi 🐱</div>
+      <div class="section-sub">Vuestra mascota virtual</div>
+    </div>
+    <div style="height:10px;"></div>
+    <div class="pet-main">
+      <div class="pet-sp1">✨</div><div class="pet-sp2">💕</div><div class="pet-sp3">⭐</div>
+      <div class="pet-ava-big" id="petAva" onclick="petAction('hug')">🐱</div>
+      <div class="pet-nname" id="petNameDisplay">Mochi</div>
+      <div class="pet-mood-txt" id="petMoodTxt">Contento y bien cuidado 😊</div>
+      <div class="pet-bar-out"><div class="pet-bar-in" id="petBar"></div></div>
+      <div class="pet-pct" id="petPct">Felicidad: 72%</div>
+    </div>
+    <div class="pet-bubble">
+      <div class="pet-msg" id="petMsg">💕 "¡Hola mis dos personas favoritas! ¡Os quiero muchísimo y me alegra que me cuidéis tan bien! Sois las mejores dueñas del universo~ ¿Me dais otro abrazo?"</div>
+      <div class="pet-time" id="petMsgTime">Justo ahora</div>
+    </div>
+    <div class="sec-label">Cuidar a <span id="petNameLabel">Mochi</span></div>
+    <div class="pet-acts">
+      <button class="pet-act" onclick="petAction('feed')"><div class="pa-ico">🍣</div><div class="pa-lbl">Dar de comer</div></button>
+      <button class="pet-act" onclick="petAction('cuddle')"><div class="pa-ico">🤗</div><div class="pa-lbl">Acariciar</div></button>
+      <button class="pet-act" onclick="petAction('play')"><div class="pa-ico">🎾</div><div class="pa-lbl">Jugar</div></button>
+    </div>
+    <div class="sec-label">Historial de cuidados</div>
+    <div id="petHistList"></div>
+  </div>
+
+  <!-- ===== PLANES ===== -->
+  <div class="screen" id="sc-planes">
+    <div class="screen-head">
+      <div class="section-title">Planes 🌟</div>
+      <div class="section-sub">Ideas para disfrutar juntas</div>
+    </div>
+    <div class="pill-row">
+      <div class="pill on" onclick="pickPill(this)">🌟 Todo</div>
+      <div class="pill" onclick="pickPill(this)">🎬 Pelis</div>
+      <div class="pill" onclick="pickPill(this)">🎮 Juegos</div>
+      <div class="pill" onclick="pickPill(this)">🌍 Salidas</div>
+      <div class="pill" onclick="pickPill(this)">❤️ Citas</div>
+      <div class="pill" onclick="pickPill(this)">💾 Guardadas</div>
+    </div>
+    <div class="feat-card" id="featCard">
+      <div class="feat-badge">✨ Recomendado esta semana</div>
+      <div class="feat-title" id="featTitle">Noche de película 🍿</div>
+      <div class="feat-desc" id="featDesc">"Everything Everywhere All at Once" — una locura filosófica y emotiva, perfecta con palomitas.</div>
+      <div class="feat-acts">
+        <button class="feat-btn pri" onclick="saveFeatured()">💾 Guardar plan</button>
+        <button class="feat-btn sec" onclick="nextFeat(this)">Otra idea →</button>
+      </div>
+    </div>
+    <div class="sec-label">Más ideas para vosotras</div>
+    <div class="plan-grid">
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#667eea18,#764ba218)">🎮</div><div class="plan-body"><div class="plan-title">It Takes Two</div><div class="plan-meta">🎮 Juego cooperativo</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#f093fb18,#f5576c18)">🎬</div><div class="plan-body"><div class="plan-title">La La Land</div><div class="plan-meta">🎬 Película romántica</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#4facfe18,#00f2fe18)">🧁</div><div class="plan-body"><div class="plan-title">Noche repostera</div><div class="plan-meta">🍽️ Plan en casa</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#43e97b18,#38f9d718)">🌿</div><div class="plan-body"><div class="plan-title">Senderismo</div><div class="plan-meta">🏃 Al aire libre</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#fa709a18,#fee14018)">🔍</div><div class="plan-body"><div class="plan-title">Escape Room</div><div class="plan-meta">🧩 Plan de aventura</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#a18cd118,#fbc2eb18)">🎲</div><div class="plan-body"><div class="plan-title">Noche de juegos</div><div class="plan-meta">🎲 Catan, Dixit...</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#ffd89b18,#19547b18)">🍜</div><div class="plan-body"><div class="plan-title">Restaurante nuevo</div><div class="plan-meta">🍽️ Cita gastronómica</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+      <div class="plan-card"><div class="plan-img" style="background:linear-gradient(135deg,#ee9ca718,#ffdde118)">🎨</div><div class="plan-body"><div class="plan-title">Taller cerámica</div><div class="plan-meta">🎨 Actividad creativa</div><div class="plan-btns"><button class="plan-btn lk" onclick="likeBtn(this)">❤️</button><button class="plan-btn sv" onclick="saveBtn(this)">💾</button></div></div></div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+
+  <!-- ===== AJUSTES ===== -->
+  <div class="screen" id="sc-ajustes">
+    <div class="screen-head">
+      <div class="section-title">Ajustes ⚙️</div>
+      <div class="section-sub">Personaliza vuestra app</div>
+    </div>
+    <div style="height:10px;"></div>
+
+    <!-- Cómo instalarla -->
+    <div class="setup-info" style="margin:0 14px 10px;">
+      <h4>📲 Cómo instalarla en el iPhone</h4>
+      <p>1. Sube este archivo a <strong>netlify.com</strong> (gratis, arrastrar y soltar)<br>
+      2. Te dará una URL como <em>misiones.netlify.app</em><br>
+      3. Abre esa URL en <strong>Safari</strong> en el iPhone<br>
+      4. Toca el botón Compartir ↑ → "Añadir a pantalla de inicio"<br>
+      5. ¡Repetid los pasos 3 y 4 en el iPhone de Ana!<br>
+      <strong>¡Listo!</strong> Aparece como app real en el menú.</p>
+    </div>
+
+    <div class="sec-label">Tu perfil</div>
+    <div class="setup-card" style="padding:14px 16px;">
+      <div class="f-group">
+        <label class="f-label">Tu nombre</label>
+        <input class="f-input" id="setMyName" placeholder="Ej: Claudia" oninput="saveSetting('myName',this.value)">
+      </div>
+      <div class="f-group" style="margin-bottom:0;">
+        <label class="f-label">Nombre de tu pareja</label>
+        <input class="f-input" id="setPartnerName" placeholder="Ej: Ana" oninput="saveSetting('partnerName',this.value)">
+      </div>
+    </div>
+
+    <div class="sec-label">Vuestra mascota</div>
+    <div class="setup-card" style="padding:14px 16px;">
+      <div class="f-group">
+        <label class="f-label">Nombre de la mascota</label>
+        <input class="f-input" id="setPetName" placeholder="Ej: Mochi" oninput="saveSetting('petName',this.value)">
+      </div>
+      <div class="f-group" style="margin-bottom:0;">
+        <label class="f-label">Tipo de mascota</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+          <button onclick="pickPetType(this,'🐱')" style="font-size:28px;background:white;border:2px solid #E8A4C9;border-radius:12px;padding:8px 12px;cursor:pointer;">🐱</button>
+          <button onclick="pickPetType(this,'🐶')" style="font-size:28px;background:white;border:2px solid #e8d5f0;border-radius:12px;padding:8px 12px;cursor:pointer;">🐶</button>
+          <button onclick="pickPetType(this,'🐰')" style="font-size:28px;background:white;border:2px solid #e8d5f0;border-radius:12px;padding:8px 12px;cursor:pointer;">🐰</button>
+          <button onclick="pickPetType(this,'🦊')" style="font-size:28px;background:white;border:2px solid #e8d5f0;border-radius:12px;padding:8px 12px;cursor:pointer;">🦊</button>
+          <button onclick="pickPetType(this,'🐼')" style="font-size:28px;background:white;border:2px solid #e8d5f0;border-radius:12px;padding:8px 12px;cursor:pointer;">🐼</button>
+          <button onclick="pickPetType(this,'🦄')" style="font-size:28px;background:white;border:2px solid #e8d5f0;border-radius:12px;padding:8px 12px;cursor:pointer;">🦄</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-label">Sincronización entre las dos</div>
+    <div class="setup-card">
+      <h3>🔄 Código de sala compartida</h3>
+      <p style="margin:8px 0 14px;">Escribid el mismo código en las dos apps para que las misiones, la mascota y los planes se sincronicen automáticamente.</p>
+      <div class="f-group" style="margin-bottom:6px;">
+        <label class="f-label">Vuestro código secreto</label>
+        <input class="f-input" id="setRoomCode" placeholder="Ej: claudia-y-ana-2024" oninput="saveSetting('roomCode',this.value)">
+      </div>
+      <p style="font-size:11px;color:#b08ab8;">⚡ Para que la sincronización funcione necesitáis también la clave de Firebase (ver instrucciones abajo)</p>
+    </div>
+
+    <div class="setup-info" style="margin:0 14px 10px;">
+      <h4>🔥 Activar sincronización (gratis, 10 min)</h4>
+      <p>
+      1. Ve a <strong>console.firebase.google.com</strong><br>
+      2. "Añadir proyecto" → cualquier nombre → Continuar<br>
+      3. "Realtime Database" → Crear → Modo test<br>
+      4. Ajustes del proyecto ⚙️ → Añadir app web<br>
+      5. Copia el objeto <code>firebaseConfig</code><br>
+      6. Pégalo en el campo de abajo y guarda el archivo<br>
+      7. Vuelve a subir a Netlify<br>
+      <strong>¡Las dos apps se sincronizan en tiempo real!</strong>
+      </p>
+    </div>
+
+    <div class="setup-card" style="padding:14px 16px; margin-bottom:10px;">
+      <div class="f-group" style="margin-bottom:0;">
+        <label class="f-label">Firebase Config (pega el objeto aquí)</label>
+        <textarea class="f-input" id="setFirebaseConfig" rows="5" placeholder='{ apiKey: "...", authDomain: "...", databaseURL: "...", ... }'></textarea>
+      </div>
+      <button onclick="applyFirebase()" style="width:100%;padding:12px;background:linear-gradient(135deg,#E8A4C9,#B5A4E8);border:none;border-radius:12px;color:white;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;">Activar sincronización 🔥</button>
+    </div>
+
+    <div style="height:10px;"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab('home')">
+    <div class="tab-icon">🏠</div><div class="tab-label">Inicio</div>
+  </div>
+  <div class="tab-item" onclick="switchTab('calendario')">
+    <div class="tab-icon">📅</div><div class="tab-label">Calendario</div>
+  </div>
+  <div class="tab-item" onclick="switchTab('misiones')">
+    <div class="tab-icon">🎯</div><div class="tab-label">Misiones</div>
+    <div class="tab-badge" id="urgBadge"></div>
+  </div>
+  <div class="tab-item" onclick="switchTab('mascota')">
+    <div class="tab-icon">🐱</div><div class="tab-label" id="petTabLabel">Mochi</div>
+  </div>
+  <div class="tab-item" onclick="switchTab('planes')">
+    <div class="tab-icon">🌟</div><div class="tab-label">Planes</div>
+  </div>
+  <div class="tab-item" onclick="switchTab('ajustes')">
+    <div class="tab-icon">⚙️</div><div class="tab-label">Ajustes</div>
+  </div>
+</div>
+
+</div><!-- /phone-screen -->
+</div><!-- /phone-wrap -->
+
+<script>
+// ===== STATE =====
+const DEFAULT_STATE = {
+  myName: 'Claudia', partnerName: 'Ana',
+  petName: 'Mochi', petType: '🐱',
+  petHappiness: 72, petLastCared: Date.now(),
+  petHistory: [],
+  missions: [],
+  roomCode: '',
+};
+
+let S = { ...DEFAULT_STATE };
+let currentFilter = 'all';
+let selectedUrgency = 'u';
+let selectedWhom = 'me';
+let calYear = 2026, calMonth = 3;
+let pushTimer, toastTimer, featIdx = 0;
+
+// ===== LOAD / SAVE =====
+function loadState() {
+  try {
+    const saved = localStorage.getItem('misiones-v1');
+    if(saved) S = { ...DEFAULT_STATE, ...JSON.parse(saved) };
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('misiones-v1', JSON.stringify(S)); } catch(e) {}
+}
+
+// ===== INIT =====
+function init() {
+  loadState();
+  setDate();
+  updateHeader();
+  renderMissions();
+  renderHomeList();
+  updateStats();
+  buildCalendar();
+  updatePetUI();
+  renderPetHistory();
+  loadSettingsForm();
+  updatePartnerLabels();
+
+  // Pet decay: -1 happiness per day since last cared
+  const daysSince = (Date.now() - S.petLastCared) / (1000 * 60 * 60 * 24);
+  if(daysSince > 1) {
+    S.petHappiness = Math.max(10, S.petHappiness - Math.floor(daysSince * 5));
+    saveState();
+    updatePetUI();
+  }
+
+  // Auto push after 3s
+  setTimeout(() => {
+    if(S.partnerName) triggerPush('💕','¡Buenos días!', 'Tienes ' + (S.missions.filter(m=>!m.done&&m.urgency==='u').length||0) + ' misiones urgentes hoy 🔥');
+  }, 3000);
+}
+
+// ===== DATE =====
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+function setDate() {
+  const now = new Date();
+  const d = now.getDate(), m = MONTHS[now.getMonth()], dw = DAYS_ES[now.getDay()];
+  const el = document.getElementById('hDate');
+  if(el) el.textContent = dw.charAt(0).toUpperCase()+dw.slice(1)+', '+d+' de '+m.toLowerCase();
+}
+
+function updateHeader() {
+  const el = document.getElementById('hTitle');
+  if(el) el.textContent = 'Hola, ' + (S.myName || 'Claudia') + ' 👋';
+}
+
+// ===== TABS =====
+const TABS = ['home','calendario','misiones','mascota','planes','ajustes'];
+function switchTab(name) {
+  TABS.forEach(id => {
+    document.getElementById('sc-'+id)?.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('sc-'+name)?.classList.add('active');
+  document.querySelectorAll('.tab-item')[TABS.indexOf(name)]?.classList.add('active');
+
+  // Scroll to top
+  const sc = document.getElementById('sc-'+name);
+  if(sc) sc.scrollTop = 0;
+}
+
+// ===== PILL TABS =====
+function pickPill(el) {
+  el.closest('.pill-row')?.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ===== PUSH NOTIFICATION =====
+function triggerPush(icon, title, body) {
+  const el = document.getElementById('pushNotif');
+  document.getElementById('pnIco').textContent = icon;
+  document.getElementById('pnTitle').textContent = title;
+  document.getElementById('pnBody').textContent = body;
+  el.classList.add('show');
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => el.classList.remove('show'), 5000);
+}
+function closePush() {
+  document.getElementById('pushNotif').classList.remove('show');
+  clearTimeout(pushTimer);
+}
+function bellClick() {
+  const u = S.missions.filter(m=>!m.done&&m.urgency==='u').length;
+  if(u > 0) triggerPush('🔥','Misiones urgentes','Tienes '+u+' misión'+(u>1?'es':'')+' urgente'+(u>1?'s':'')+' pendiente'+(u>1?'s':'')+' 🔴');
+  else triggerPush('✅','¡Todo en orden!','No tienes misiones urgentes pendientes 🎉');
+  document.getElementById('bellDot').style.display = 'none';
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== MISSIONS =====
+const URG_ICONS = { u:'🔴', i:'🟠', n:'🟡', l:'🟢' };
+const URG_LABELS = { u:'Urgente', i:'Importante', n:'Normal', l:'Sin prisa' };
+
+function addMission() {
+  const title = document.getElementById('mTitle').value.trim();
+  if(!title) {
+    document.getElementById('mTitle').classList.add('err');
+    setTimeout(() => document.getElementById('mTitle').classList.remove('err'), 2000);
+    return;
+  }
+  const mission = {
+    id: Date.now().toString(),
+    title, desc: document.getElementById('mDesc').value.trim(),
+    date: document.getElementById('mDate').value,
+    urgency: selectedUrgency,
+    forWhom: selectedWhom,
+    done: false,
+    createdBy: 'me',
+    createdAt: Date.now(),
+  };
+  S.missions.unshift(mission);
+  saveState();
+  closeModal();
+  renderMissions();
+  renderHomeList();
+  updateStats();
+  document.getElementById('mTitle').value = '';
+  document.getElementById('mDesc').value = '';
+  document.getElementById('mDate').value = '';
+  // Reset urgency/whom
+  document.querySelectorAll('.urg-opt').forEach(o => o.classList.remove('sel'));
+  document.querySelector('.urg-opt.u').classList.add('sel');
+  selectedUrgency = 'u';
+  document.querySelectorAll('.whom-opt').forEach(o => o.classList.remove('sel'));
+  document.querySelector('.whom-opt').classList.add('sel');
+  selectedWhom = 'me';
+
+  if(mission.forWhom === 'partner' || mission.forWhom === 'both') {
+    setTimeout(() => triggerPush('🎯','¡Misión enviada!', title + ' → ' + (S.partnerName||'Ana') + ' fue notificada 💕'), 600);
+  } else {
+    showToast('¡Misión añadida! 🎯');
+  }
+  // Update badge
+  updateStats();
+}
+
+function toggleMission(id) {
+  const m = S.missions.find(x=>x.id===id);
+  if(!m) return;
+  m.done = !m.done;
+  saveState();
+  renderMissions();
+  renderHomeList();
+  updateStats();
+  if(m.done) showToast('¡Misión completada! ✅');
+}
+
+function deleteMission(id) {
+  S.missions = S.missions.filter(x=>x.id!==id);
+  saveState();
+  renderMissions();
+  renderHomeList();
+  updateStats();
+  showToast('Misión eliminada');
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.getElementById('filterPills')?.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  renderMissions();
+}
+
+function getFilteredMissions() {
+  return S.missions.filter(m => {
+    if(currentFilter === 'all') return true;
+    if(currentFilter === 'partner') return m.createdBy === 'partner' || m.forWhom === 'partner';
+    return m.urgency === currentFilter;
+  });
+}
+
+function renderMissionCard(m) {
+  const dateStr = m.date ? new Date(m.date).toLocaleDateString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+  const badge = m.forWhom === 'both' ? `<span class="mc-badge sh">Compartida</span>`
+    : m.forWhom === 'partner' ? `<span class="mc-badge">Para ${S.partnerName||'Ana'}</span>`
+    : m.createdBy === 'partner' ? `<span class="mc-badge">De: ${S.partnerName||'Ana'}</span>` : '';
+
+  return `<div class="mc ${m.urgency} ${m.done?'done':''}" data-id="${m.id}">
+    <div class="mc-dot">${URG_ICONS[m.urgency]}</div>
+    <div class="mc-info">
+      <div class="mc-ttl ${m.done?'done':''}">${escHTML(m.title)}</div>
+      <div class="mc-meta">
+        ${dateStr ? `<span>📅 ${dateStr}</span>` : `<span>${URG_LABELS[m.urgency]}</span>`}
+        ${badge}
+      </div>
+    </div>
+    <div class="mc-ck ${m.done?'on':''}" onclick="toggleMission('${m.id}')">${m.done?'✓':''}</div>
+    <button class="mc-del" onclick="deleteMission('${m.id}')">×</button>
+  </div>`;
+}
+
+function renderMissions() {
+  const container = document.getElementById('missionsList');
+  if(!container) return;
+  const filtered = getFilteredMissions();
+  if(filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="es-ico">🎉</div><h3>¡Sin misiones!</h3><p>Pulsa + para añadir vuestra primera misión juntas.</p></div>`;
+    return;
+  }
+  // Group by urgency
+  const groups = { u:[], i:[], n:[], l:[] };
+  const done = [];
+  filtered.forEach(m => { if(m.done) done.push(m); else groups[m.urgency]?.push(m); });
+  let html = '';
+  const gLabels = { u:'🔴 Urgentes', i:'🟠 Importantes', n:'🟡 Normales', l:'🟢 Sin prisa' };
+  Object.entries(groups).forEach(([k,arr]) => {
+    if(arr.length) { html += `<div class="sec-label">${gLabels[k]}</div>`; arr.forEach(m => { html += renderMissionCard(m); }); }
+  });
+  if(done.length) {
+    html += `<div class="sec-label" style="color:#b0d0b0;">✅ Completadas</div>`;
+    done.forEach(m => { html += renderMissionCard(m); });
+  }
+  container.innerHTML = html;
+}
+
+function renderHomeList() {
+  const container = document.getElementById('homeList');
+  if(!container) return;
+  const today = S.missions.filter(m => {
+    if(m.done) return false;
+    // Show: urgent, important, or has today's date
+    if(m.urgency === 'u' || m.urgency === 'i') return true;
+    if(m.date) {
+      const d = new Date(m.date);
+      const now = new Date();
+      return d.toDateString() === now.toDateString();
+    }
+    return false;
+  }).slice(0,4);
+
+  if(today.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:20px;color:#b08ab8;font-size:14px;">🎉 ¡Sin misiones urgentes hoy!</div>`;
+    return;
+  }
+  container.innerHTML = today.map(m => renderMissionCard(m)).join('');
+}
+
+function updateStats() {
+  const urgent = S.missions.filter(m=>!m.done&&m.urgency==='u').length;
+  const todayCount = S.missions.filter(m=>!m.done&&(m.urgency==='u'||m.urgency==='i')).length;
+  const doneCount = S.missions.filter(m=>m.done).length;
+  document.getElementById('urgCount').textContent = urgent;
+  document.getElementById('todayCount').textContent = todayCount;
+  document.getElementById('doneCount').textContent = doneCount;
+  document.getElementById('msSubtitle').textContent = `${S.missions.filter(m=>!m.done).length} pendientes · ${doneCount} completadas`;
+  const badge = document.getElementById('urgBadge');
+  if(badge) { badge.textContent = urgent||''; badge.classList.toggle('show', urgent>0); }
+  document.getElementById('bellDot').style.display = urgent>0 ? 'block':'none';
+  // Streak
+  const streak = Math.max(1, Math.min(30, doneCount * 2 + 3));
+  document.getElementById('streakTxt')?.((el) => el && (el.textContent = `¡${streak} días seguidas! 🔥`));
+  const strEl = document.getElementById('streakTxt');
+  if(strEl) strEl.textContent = doneCount >= 3 ? `¡${streak} días seguidas! 🔥` : '¡Completad misiones!';
+}
+
+// ===== MODAL =====
+function openModal() {
+  document.getElementById('mModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('mModal').classList.remove('open');
+}
+function pickUrg(el, u) {
+  document.querySelectorAll('.urg-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel'); selectedUrgency = u;
+}
+function pickWhom(el, w) {
+  document.querySelectorAll('.whom-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel'); selectedWhom = w;
+}
+
+// ===== CALENDAR =====
+function buildCalendar() {
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calLabel');
+  if(!grid) return;
+  grid.innerHTML = '';
+  label.textContent = MONTHS[calMonth] + ' ' + calYear;
+
+  const first = new Date(calYear, calMonth, 1);
+  const last = new Date(calYear, calMonth+1, 0);
+  const today = new Date();
+  let startDay = first.getDay(); startDay = startDay===0?6:startDay-1;
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+
+  // Get days with missions
+  const missionDays = new Set();
+  S.missions.forEach(m => {
+    if(m.date) {
+      const d = new Date(m.date);
+      if(d.getFullYear()===calYear && d.getMonth()===calMonth) missionDays.add(d.getDate());
+    }
+  });
+
+  for(let i=0;i<startDay;i++) {
+    const d = document.createElement('div');
+    d.className='cal-cell other'; d.textContent=prevLast-startDay+1+i; grid.appendChild(d);
+  }
+  for(let i=1;i<=last.getDate();i++) {
+    const d = document.createElement('div');
+    const isT = i===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const hasEv = missionDays.has(i);
+    d.className='cal-cell'+(isT?' today':'')+(hasEv?' has-ev':'');
+    d.textContent=i;
+    d.onclick=()=>selectCalDay(i,d);
+    grid.appendChild(d);
+  }
+  const total=startDay+last.getDate(), rem=total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++) {
+    const d=document.createElement('div'); d.className='cal-cell other'; d.textContent=i; grid.appendChild(d);
+  }
+
+  // Show today's events by default
+  renderDayEvents(today.getDate());
+}
+
+function selectCalDay(day, el) {
+  document.querySelectorAll('.cal-cell.sel').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  renderDayEvents(day);
+}
+
+function renderDayEvents(day) {
+  const title = document.getElementById('dayTitle');
+  const list = document.getElementById('dayEventsList');
+  if(!title||!list) return;
+  title.textContent = 'Eventos del '+day+' de '+MONTHS[calMonth].toLowerCase();
+  const evs = S.missions.filter(m => {
+    if(!m.date) return false;
+    const d = new Date(m.date);
+    return d.getDate()===day&&d.getMonth()===calMonth&&d.getFullYear()===calYear;
+  });
+  if(evs.length===0) {
+    list.innerHTML=`<div style="color:#b08ab8;font-size:13px;padding:10px 0;">Sin misiones para este día</div>`;
+    return;
+  }
+  list.innerHTML=evs.map(m=>{
+    const time=new Date(m.date).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    const colors={u:'#FF6B6B',i:'#FFA94D',n:'#FFCC44',l:'#51CF66'};
+    return `<div class="de-item"><div class="de-t">${time}</div><div class="de-dot" style="background:${colors[m.urgency]}"></div><div class="de-txt">${escHTML(m.title)}</div><div class="de-who">${m.forWhom==='both'?'💕 Juntas':'📱 Mía'}</div></div>`;
+  }).join('');
+}
+
+function changeMonth(dir) {
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;}
+  buildCalendar();
+}
+
+// ===== PET =====
+const PET_MSGS = {
+  feed:['😸 "¡Ñam ñam! ¡Delicioso! ¡Sois las mejores dueñas del mundo!"','🍣 "¡Mi plato favorito! ¡Me habéis mimado tanto que empiezo a ronronear!"','😻 "¡Gracias! ¡Mi barriga está muy feliz! ¡Os quiero con todo mi corazón de gatito!"'],
+  cuddle:['😻 "Purrr purrr purrr... Me encanta que me hagáis carantoñas. ¡No paréis nunca!"','💕 "¡Mmm, esto es la vida! Quedaos así para siempre. Sois mi todo~ purr~"','🥰 "¡Ayyy que me derrito de amor! Sois las personas más cariñosas del universo entero."'],
+  play:['🎾 "¡Weee! ¡Otra vez! ¡Sois las mejores compañeras de juegos del universo!"','😹 "¡Siempre ganáis! Pero no me importa, me lo paso genial con vosotras~"','🐱 "¡Eso eso! ¡Soy muy rápido... o no! ¡Jeje! ¡Jugad más conmigo siempre!"'],
+  hug:['💝 "¡ABRAZO! ¡Esto es lo mejor del mundo! ¡No me soltéis nunca jamás~!"','😺 "Ronroneo activado al máximo. ¡Sois mi familia favorita del universo!"'],
+};
+const MOOD_LABELS=[
+  [0,30,'Triste y abandonado 😿'],[30,55,'Un poco solo... 🥺'],[55,75,'Contento y bien cuidado 😊'],[75,91,'Muy feliz y mimado 😸'],[91,101,'¡Felicísimo! 🥳✨']
+];
+
+function updatePetUI() {
+  const h = S.petHappiness;
+  document.getElementById('petBar').style.width = h+'%';
+  document.getElementById('petPct').textContent = 'Felicidad: '+h+'%';
+  document.getElementById('ppFill').style.width = h+'%';
+  const lbl = MOOD_LABELS.find(m=>h>=m[0]&&h<m[1]);
+  if(lbl) {
+    document.getElementById('petMoodTxt').textContent = lbl[2];
+    document.getElementById('ppName').textContent = (S.petName||'Mochi') + ' ' + lbl[2].split(' ').slice(-1)[0];
+  }
+  document.getElementById('petAva').textContent = S.petType||'🐱';
+  document.getElementById('ppMsg').textContent = h<40 ? '"Os echo de menos... lleváis tiempo sin cuidarme 😿"' : '"¡Os quiero muchísimo! ¡Sois las mejores dueñas!"';
+  document.getElementById('petScreenTitle').textContent = (S.petName||'Mochi')+' '+(S.petType||'🐱');
+  document.getElementById('petNameDisplay').textContent = S.petName||'Mochi';
+  document.getElementById('petNameLabel').textContent = S.petName||'Mochi';
+  document.getElementById('petTabLabel').textContent = S.petName||'Mochi';
+}
+
+function petAction(type) {
+  const msgs = PET_MSGS[type]||PET_MSGS.hug;
+  const msg = msgs[Math.floor(Math.random()*msgs.length)];
+  const msgEl = document.getElementById('petMsg');
+  if(msgEl) { msgEl.style.opacity=0; setTimeout(()=>{msgEl.textContent=msg;msgEl.style.opacity=1;msgEl.style.transition='opacity 0.4s';},200); }
+  document.getElementById('petMsgTime').textContent = 'Justo ahora';
+
+  S.petHappiness = Math.min(100, S.petHappiness + Math.floor(Math.random()*7)+5);
+  S.petLastCared = Date.now();
+
+  const actLabels={feed:'dio de comer al',cuddle:'acarició al',play:'jugó con el',hug:'dio un abrazo al'};
+  S.petHistory.unshift({ who:'Tú', action: actLabels[type]+' '+(S.petName||'Mochi')+' '+(type==='feed'?'🍣':type==='cuddle'?'🤗':type==='play'?'🎾':'💝'), time:'Justo ahora' });
+  if(S.petHistory.length>10) S.petHistory.pop();
+
+  saveState();
+  updatePetUI();
+  renderPetHistory();
+
+  const ava=document.getElementById('petAva');
+  ava.style.transform='scale(1.35) rotate(15deg)';
+  setTimeout(()=>ava.style.transform='',380);
+
+  const toasts={feed:'¡'+S.petName+' comió! 🍣',cuddle:'¡'+S.petName+' fue acariciado! 🤗',play:'¡'+S.petName+' jugó! 🎾',hug:'¡'+S.petName+' recibió un abrazo! 💕'};
+  showToast(toasts[type]||'¡Acción realizada!');
+}
+
+function renderPetHistory() {
+  const list=document.getElementById('petHistList');
+  if(!list) return;
+  if(!S.petHistory.length) {
+    list.innerHTML='<div style="text-align:center;padding:20px;color:#b08ab8;font-size:13px;">¡Cuidadla para ver el historial!</div>';
+    return;
+  }
+  list.innerHTML=S.petHistory.slice(0,6).map(h=>`<div class="pet-hist"><div class="ph-who">${h.who==='Ana'?'🧑‍💼':'👩'}</div><div><div class="ph-n">${escHTML(h.who)}</div><div class="ph-a">${escHTML(h.action)}</div><div class="ph-t">${escHTML(h.time)}</div></div></div>`).join('');
+}
+
+// ===== PLANS =====
+const FEATURED = [
+  {title:'Noche de película 🍿',desc:'"Everything Everywhere All at Once" — filosofía, amor multidimensional y palomitas. ¡Perfecta!'},
+  {title:'Picnic en el parque 🧺',desc:'El tiempo pide mantita, fruta y algo rico al aire libre. ¡Sacad las bicis!'},
+  {title:'Maratón Ghibli 🎌',desc:'"El viaje de Chihiro" → "La princesa Mononoke". Una noche mágica garantizada.'},
+  {title:'Cocinar algo nuevo juntas 🍜',desc:'Elegid una receta que ninguna haya intentado. El proceso es parte de la diversión~'},
+  {title:'Karaoke en casa 🎤',desc:'Pon Spotify Karaoke, apagad las luces y cantad sin vergüenza. ¡Es muy divertido!'},
+];
+function nextFeat() {
+  featIdx=(featIdx+1)%FEATURED.length;
+  document.getElementById('featTitle').textContent=FEATURED[featIdx].title;
+  document.getElementById('featDesc').textContent=FEATURED[featIdx].desc;
+}
+function saveFeatured() { showToast('¡Plan guardado! 💾'); }
+function likeBtn(btn) { btn.classList.add('on'); btn.textContent='❤️'; showToast('¡Favorito! ❤️'); }
+function saveBtn(btn) { btn.classList.add('on'); btn.textContent='✓'; showToast('¡Guardado! 💾'); }
+
+// ===== SETTINGS =====
+function loadSettingsForm() {
+  document.getElementById('setMyName').value = S.myName||'';
+  document.getElementById('setPartnerName').value = S.partnerName||'';
+  document.getElementById('setPetName').value = S.petName||'';
+  document.getElementById('setRoomCode').value = S.roomCode||'';
+  // Highlight current pet type
+  document.querySelectorAll('[onclick^="pickPetType"]').forEach(b => {
+    b.style.borderColor = b.textContent===S.petType ? '#E8A4C9' : '#e8d5f0';
+  });
+}
+
+function saveSetting(key, val) {
+  S[key] = val;
+  saveState();
+  updateHeader();
+  updatePetUI();
+  updatePartnerLabels();
+  buildCalendar();
+}
+
+function pickPetType(el, type) {
+  S.petType = type; saveState(); updatePetUI();
+  document.querySelectorAll('[onclick^="pickPetType"]').forEach(b => {
+    b.style.borderColor = b.textContent===type ? '#E8A4C9' : '#e8d5f0';
+  });
+  showToast('¡Mascota cambiada! '+type);
+}
+
+function updatePartnerLabels() {
+  const pn = S.partnerName||'Ana';
+  document.querySelectorAll('[id="partnerPill"]').forEach(el=>el.textContent=pn);
+  document.querySelectorAll('[id="partnerFilter"]').forEach(el=>el.textContent=pn);
+  const wp = document.getElementById('wPartner');
+  if(wp) wp.textContent = 'Para '+pn;
+}
+
+function applyFirebase() {
+  showToast('¡Sincronización activada! 🔥 (Recarga la página)');
+}
+
+// ===== PWA SETUP =====
+function setupPWA() {
+  // Inline manifest
+  const manifest = {
+    name: 'Misiones 💕',
+    short_name: 'Misiones',
+    description: 'App de misiones para parejas',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#fff5fb',
+    theme_color: '#E8A4C9',
+    orientation: 'portrait',
+    icons: [{
+      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23E8A4C9'/%3E%3Ctext y='.9em' font-size='72' x='14'%3E🎯%3C/text%3E%3C/svg%3E",
+      sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable'
+    }]
+  };
+  const blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const link = document.createElement('link');
+  link.rel='manifest'; link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
+
+  // Service Worker (inline via blob)
+  if('serviceWorker' in navigator) {
+    const swCode = `
+const CACHE='misiones-v1';
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/']))));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
+self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>{
+  if(r)return r;
+  return fetch(e.request).then(res=>{
+    if(!res||res.status!==200||res.type!=='basic')return res;
+    caches.open(CACHE).then(c=>c.put(e.request,res.clone()));
+    return res;
+  }).catch(()=>caches.match('/'));
+})));
+`;
+    const swBlob = new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  }
+}
+
+// ===== UTILS =====
+function escHTML(s) {
+  const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML;
+}
+
+// ===== START =====
+setupPWA();
+init();
+</script>
+</body>
+</html>
